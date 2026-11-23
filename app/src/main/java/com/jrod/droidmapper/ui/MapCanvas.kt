@@ -158,7 +158,7 @@ private fun buildScene(map: GameMap, spot: Map<String, Spot>): Scene {
 
 @Composable
 fun MapCanvas(
-    map: GameMap, placed: Map<String, Spot>, names: Map<String, String>,
+    map: GameMap, placed: Map<String, Spot>, names: Map<String, String>, boxes: Set<String>,
     onTapRoom: (String) -> Unit, onOpenRoom: (String) -> Unit,
 ) {
     val scheme = MaterialTheme.colorScheme
@@ -207,7 +207,7 @@ fun MapCanvas(
             scale(density * zoom, density * zoom, Offset.Zero)
         }) {
             drawScene(
-                scene, map, names, measurer, density,
+                scene, map, names, boxes, measurer, density, todo = scheme.tertiary, fold = scheme.primaryContainer,
                 ink = scheme.onSurface, box = scheme.surface, edge = scheme.outline, plate = scheme.outlineVariant,
                 accent = scheme.primary, warn = scheme.error, muted = scheme.onSurfaceVariant,
             )
@@ -246,7 +246,8 @@ private fun port(centre: Offset, d: Dir?, toward: Offset): Pair<Offset, Offset> 
 }
 
 private fun DrawScope.drawScene(
-    scene: Scene, map: GameMap, names: Map<String, String>, measurer: TextMeasurer, density: Float,
+    scene: Scene, map: GameMap, names: Map<String, String>, boxes: Set<String>, measurer: TextMeasurer, density: Float,
+    todo: Color, fold: Color,
     ink: Color, box: Color, edge: Color, plate: Color, accent: Color, warn: Color, muted: Color,
 ) {
     // The canvas is already scaled by the screen density, and text is measured in real pixels,
@@ -364,6 +365,24 @@ private fun DrawScope.drawScene(
         drawLine(warn, end + Offset(-u.y, u.x) * 6f, end - Offset(-u.y, u.x) * 6f, 2.4f)
         if (!p.dir.isCompass) label(p.dir.label, end, u, tagStyle.copy(color = warn))
     }
+    // Ways out the game mentions that have not been tried: a green stub ending in an open ring,
+    // or "U?" / "D?" where the direction has no side of its own.
+    for (room in map.rooms) {
+        val c = scene.centre[room.id] ?: continue
+        for (d in room.unexplored) {
+            if (map.exit(room.id, d) != null) continue
+            if (d.isCompass) {
+                val (at, u) = port(c, d, c)
+                drawLine(todo, at, at + u * 10f, 2.4f)
+                drawCircle(todo, 4.2f, at + u * 14.5f, style = Stroke(2.2f))
+                solid.add(Rect(at.x + u.x * 14.5f - 7f, at.y + u.y * 14.5f - 7f, at.x + u.x * 14.5f + 7f, at.y + u.y * 14.5f + 7f))
+            } else {
+                val up = d == Dir.UP || d == Dir.IN
+                label("${d.label}?", Offset(c.x + TILE_W / 2 - 16f, c.y + if (up) -TILE_D / 2 - 2f else TILE_D / 2 + 2f),
+                    Offset(0f, if (up) -1f else 1f), tagStyle.copy(color = todo))
+            }
+        }
+    }
     // What is lying in a room is written beside it, as on Infocom's printed maps.
     for (room in map.rooms) {
         val c = scene.centre[room.id] ?: continue
@@ -379,7 +398,7 @@ private fun DrawScope.drawScene(
     for ((id, c) in scene.centre) {
         val shape = path(tile(c))
         val current = id == map.current
-        drawPath(shape, box)
+        drawPath(shape, if (id in boxes) fold else box)       // a folded tangle is tinted
         drawPath(shape, if (current) accent else ink, style = Stroke(if (current) 4.5f else 1.8f))
         val laid = measurer.measure(
             names[id] ?: "",

@@ -35,6 +35,8 @@ data class Room(
     val description: String = "",
     /** What is lying here. Shown beside the room on the map, as printed maps do. */
     val items: String = "",
+    /** Ways out the game mentions that the player has not tried yet. */
+    val unexplored: List<Dir> = emptyList(),
 )
 
 /**
@@ -101,7 +103,7 @@ fun GameMap.walkTo(dir: Dir, destId: String): GameMap {
     if (destId != here && facts.none { it.from == destId && it.dir == back }) {
         facts = facts + Passage(destId, back, here, assumed = true)
     }
-    return copy(passages = facts, current = destId)
+    return copy(passages = facts, current = destId).explored(here, dir)
 }
 
 /** The player went [dir] and is somewhere new, which they call [name]. */
@@ -126,7 +128,7 @@ fun GameMap.cannotGo(dir: Dir): GameMap {
             if (p.from == old.to && p.to == here && p.dir == dir.opposite) p.copy(oneWay = true) else p
         }
     }
-    return copy(passages = facts + Passage(here, dir, null))
+    return copy(passages = facts + Passage(here, dir, null)).explored(here, dir)
 }
 
 /** Died, restored, teleported: the player is simply somewhere else now. No passage is recorded. */
@@ -169,6 +171,27 @@ fun GameMap.displayNames(): Map<String, String> {
         r.id to if (twins.size == 1) base else "$base (${twins.indexOf(r) + 1})"
     }
 }
+
+/** Once a way out has been tried it is no longer "unexplored", whatever happened. */
+private fun GameMap.explored(roomId: String, dir: Dir): GameMap =
+    if (room(roomId)?.unexplored?.contains(dir) != true) this
+    else copy(rooms = rooms.map { if (it.id == roomId) it.copy(unexplored = it.unexplored - dir) else it })
+
+/**
+ * Note, or stop noting, that the game mentions a way out of [roomId] by [dir] which has not
+ * been tried. Nothing happens if something is already known about that way.
+ */
+fun GameMap.toggleUnexplored(roomId: String, dir: Dir): GameMap {
+    if (exit(roomId, dir) != null) return this
+    return copy(rooms = rooms.map {
+        if (it.id != roomId) it
+        else it.copy(unexplored = if (dir in it.unexplored) it.unexplored - dir else (it.unexplored + dir).sortedBy { d -> d.ordinal })
+    })
+}
+
+/** Every unexplored way out on the map: (room, direction). */
+fun GameMap.toExplore(): List<Pair<Room, Dir>> =
+    rooms.flatMap { r -> r.unexplored.filter { exit(r.id, it) == null }.map { r to it } }
 
 // ---- Fixing things that only become clear later ---------------------------------------------
 

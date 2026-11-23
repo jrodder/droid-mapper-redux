@@ -119,6 +119,77 @@ class FixLaterTest {
     }
 }
 
+class UnexploredTest {
+    private val start = GameMap.starting("Test", "Kitchen")
+
+    @Test
+    fun `an exit can be noted as mentioned and the note clears when it is tried`() {
+        val noted = start.toggleUnexplored("r1", Dir.W).toggleUnexplored("r1", Dir.UP)
+        assertEquals(listOf(Dir.W, Dir.UP), noted.toExplore().map { it.second })
+        assertEquals(listOf(Dir.UP), noted.walkToNew(Dir.W, "Hall").toExplore().map { it.second })
+        assertEquals(listOf(Dir.W), noted.cannotGo(Dir.UP).toExplore().map { it.second })
+        assertEquals(emptyList<Dir>(), noted.toggleUnexplored("r1", Dir.W).toggleUnexplored("r1", Dir.UP).toExplore().map { it.second })
+    }
+
+    @Test
+    fun `a way already known cannot be marked unexplored`() {
+        val m = start.walkToNew(Dir.E, "Hall")
+        assertEquals(m, m.toggleUnexplored("r1", Dir.E))
+        assertEquals(m, m.toggleUnexplored("r2", Dir.W))      // the assumed way back counts as known
+    }
+}
+
+class TangleTest {
+    /** Hall, then three rooms all called Maze whose exits do not come back the way they went. */
+    private fun maze(): GameMap = GameMap.starting("T", "Hall")
+        .walkToNew(Dir.W, "Maze")       // r2
+        .walkToNew(Dir.N, "Maze")       // r3
+        .walkToNew(Dir.S, "Maze")       // r4: south from r3 is not back to r2
+        .walkTo(Dir.N, "r2")            // north from r4 is not back to r3
+        .walkTo(Dir.S, "r3")            // south from r2 is not r4
+        .walkTo(Dir.W, "r3")            // r3 west: straight back to itself
+        .jumpTo("r2").walkTo(Dir.W, "r2")
+        .jumpTo("r4").walkTo(Dir.W, "r4")
+
+    @Test
+    fun `three same-named rooms whose exits do not return are a tangle`() {
+        assertEquals(mapOf("r2" to "r2", "r3" to "r2", "r4" to "r2"), tangleBoxes(maze()))
+    }
+
+    @Test
+    fun `an ordinary map has no tangles`() {
+        val m = GameMap.starting("T", "A").walkToNew(Dir.E, "Forest").walkToNew(Dir.E, "Forest").walkToNew(Dir.E, "Forest")
+            .walkTo(Dir.W, "r3").walkTo(Dir.W, "r2").walkTo(Dir.W, "r1")
+        assertTrue(tangleBoxes(m).isEmpty())
+    }
+
+    @Test
+    fun `a tangle is one box on the map, linked to the room outside it`() {
+        val f = foldTangles(maze())
+        assertEquals(listOf("Hall", "Maze x3"), f.map.rooms.map { it.name })
+        assertEquals("r2", f.map.current)                       // standing in r4, which is inside the box
+        assertEquals("r2", f.map.exit("r1", Dir.W)!!.to)
+        assertTrue(f.map.passages.none { it.from == "r2" && it.to == "r2" })
+        val spots = floorsOf(f.map)
+        assertEquals(setOf("r1", "r2"), spots.keys)
+    }
+
+    @Test
+    fun `a same-named room found later from inside joins the tangle`() {
+        val m = maze().walkToNew(Dir.E, "Maze")                 // r5, east of r4
+        assertEquals("r2", tangleBoxes(m)["r5"])
+    }
+
+    @Test
+    fun `the web layout gives every room its own place`() {
+        val nodes = listOf("a", "b", "c", "d", "e")
+        val spots = webLayout(nodes, setOf("a" to "b", "b" to "c", "c" to "d", "a" to "e"))
+        assertEquals(nodes.toSet(), spots.keys)
+        assertTrue(spots.values.all { it.first in 0f..1f && it.second in 0f..1f })
+        assertEquals(5, spots.values.toSet().size)
+    }
+}
+
 class LayoutTest {
     @Test
     fun `a square of rooms is drawn as a square`() {

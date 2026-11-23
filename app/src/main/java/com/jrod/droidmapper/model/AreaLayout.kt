@@ -330,9 +330,13 @@ fun clear(pos: Map<String, Cell>, taken: Set<Cell>, a: String, b: String, d: Dir
  */
 fun layoutOf(map: GameMap, dock: Boolean = true): Map<String, Placed> {
     val engine = AreaLayout(map.rooms.first().id, dock)
+    val used = HashSet<Pair<String, Dir>>()
     for (p in map.passages) {
         val to = p.to ?: continue
         if (p.assumed) continue
+        // A folded tangle can leave by one direction to several places; only the first can
+        // steer the layout, the rest are drawn as labels.
+        if (!used.add(p.from to p.dir)) continue
         engine.arrive(p.from)
         engine.move(p.from, p.dir, to)
     }

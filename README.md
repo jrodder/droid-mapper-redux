@@ -15,12 +15,22 @@ which way you went and what the room is called; it draws the map. You never posi
 - **Double-tap or hold a room** for its card: name, description, items, and every way to put
   right something that only became clear later: mark an exit one-way, say it leads
   elsewhere, remove it, merge the room with another ("Same room as…"), or delete it.
+- **Unexplored exits.** Hold a direction on the pad (or tick it on the room's card) to note a
+  way out the game mentions that you haven't tried. It shows as a green stub on the map and
+  in the "to explore" list, and clears itself when you try it.
+- **Tangles fold themselves.** Three or more connected rooms with the same name whose exits
+  don't come back the way they went (a maze, for instance) become one box on the map. Tap
+  the box for a web of the rooms and a table of where every exit leads.
 - **One map per game.** The list of maps is where you make, rename and delete them; the app
   reopens on the map you were last in.
 
-| Map and direction pad | Arrival panel | Room view | Room card | Maps |
-|---|---|---|---|---|
-| ![Map and direction pad](docs/screen-direction-pad.png) | ![Arrival panel](docs/screen-arrival-panel.png) | ![Room view](docs/screen-room-view.png) | ![Room card](docs/screen-room-card.png) | ![Maps](docs/screen-map-list.png) |
+| Map and direction pad | Arrival panel | Room view | Room card |
+|---|---|---|---|
+| ![Map and direction pad](docs/screen-direction-pad.png) | ![Arrival panel](docs/screen-arrival-panel.png) | ![Room view](docs/screen-room-view.png) | ![Room card](docs/screen-room-card.png) |
+
+| Unexplored exits | A folded tangle | Maps |
+|---|---|---|
+| ![Unexplored exits](docs/screen-unexplored.png) | ![A folded tangle](docs/screen-tangle.png) | ![Maps](docs/screen-map-list.png) |
 
 ## Install on a phone
 

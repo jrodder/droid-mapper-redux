@@ -2,8 +2,10 @@ package com.jrod.droidmapper.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -57,12 +60,22 @@ import com.jrod.droidmapper.model.Passage
 import com.jrod.droidmapper.model.Room
 import com.jrod.droidmapper.model.displayNames
 import com.jrod.droidmapper.model.guessArrival
+import com.jrod.droidmapper.model.toExplore
 
 @Composable
 fun MapScreen(vm: MapViewModel, onMaps: () -> Unit) {
     val s by vm.state.collectAsState()
     BackHandler(onBack = onMaps)        // back leaves the map for the list (unless a question is open, below)
     val names = remember(s.map.rooms) { s.map.displayNames() }
+    // The map is drawn with tangles folded, so a box carries a name like "Maze x15".
+    val drawnNames = remember(s.folded) { s.folded.map.displayNames() }
+    val boxes = s.folded.members.keys
+    // Where each real room is drawn; a room inside a tangle is wherever its box is.
+    val spots = remember(s.placed, s.folded) {
+        s.map.rooms.mapNotNull { r -> s.placed[s.folded.fold(r.id)]?.let { r.id to it } }.toMap()
+    }
+    val toExplore = remember(s.map) { s.map.toExplore() }
+    var showToExplore by remember { mutableStateOf(false) }
     // The whole screen rises above the keyboard, so nothing the player needs is ever behind it.
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).systemBarsPadding().imePadding()) {
         Row(
@@ -76,16 +89,22 @@ fun MapScreen(vm: MapViewModel, onMaps: () -> Unit) {
                 maxLines = 1, overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
+            if (toExplore.isNotEmpty()) {
+                TextButton(onClick = { showToExplore = true }) {
+                    Text("${toExplore.size} to explore", color = MaterialTheme.colorScheme.tertiary)
+                }
+            }
             TextButton(onClick = vm::undo, enabled = s.canUndo) { Text("Undo") }
         }
         Box(Modifier.weight(1f).fillMaxWidth()) {
             // While the app is asking where you arrived, tapping a room on the map is an answer.
             // A double tap or a long press opens a room's card: everything about it, and every fix.
             MapCanvas(
-                s.map, s.placed, names,
+                s.folded.map, s.placed, drawnNames, boxes,
                 // A single tap shows what is known about a room; while the app is asking, it answers.
-                onTapRoom = { if (s.asking != null) vm.arrivedAt(it) else vm.viewRoom(it) },
-                onOpenRoom = { if (s.asking == null) vm.openRoom(it) },
+                // A tangle's box opens the tangle's own view either way.
+                onTapRoom = { if (s.asking == null) vm.viewRoom(it) else if (it !in boxes) vm.arrivedAt(it) },
+                onOpenRoom = { if (s.asking == null) { if (it in boxes) vm.viewRoom(it) else vm.openRoom(it) } },
             )
         }
         val asking = s.asking
@@ -95,7 +114,7 @@ fun MapScreen(vm: MapViewModel, onMaps: () -> Unit) {
                 dir = asking,
                 map = s.map,
                 names = names,
-                guesses = remember(s.map, asking) { guessArrival(s.map, s.placed, asking) }.map { it.id },
+                guesses = remember(s.map, asking) { guessArrival(s.map, spots, asking) }.map { it.id },
                 onRoom = { vm.arrivedAt(it) },
                 onNew = { vm.arrivedSomewhereNew(it) },
                 onCouldNot = { vm.couldNotGo() },
@@ -117,11 +136,36 @@ fun MapScreen(vm: MapViewModel, onMaps: () -> Unit) {
                     TextButton(onClick = vm::notHere) { Text("Not here?") }
                 }
             }
-            DirectionPad(s.map, onDirection = vm::tapDirection, onHere = { vm.openRoom(s.map.current) })
+            DirectionPad(
+                s.map, onDirection = vm::tapDirection,
+                onMark = { vm.toggleUnexplored(s.map.current, it) },
+                onHere = { vm.openRoom(s.map.current) },
+            )
         }
     }
     s.viewing?.let { id ->
-        s.map.room(id)?.let { room -> RoomGlance(room, s.map, names, onClose = vm::closeView) }
+        val inside = s.folded.members[id]
+        if (inside != null) {
+            TangleView(inside, s.map, names, onEditRoom = { vm.openRoom(it) }, onClose = vm::closeView)
+        } else {
+            s.map.room(id)?.let { room -> RoomGlance(room, s.map, names, onClose = vm::closeView) }
+        }
+    }
+    if (showToExplore) {
+        AlertDialog(
+            onDismissRequest = { showToExplore = false },
+            title = { Text("Still to explore") },
+            text = {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    for ((room, dir) in toExplore) {
+                        TextButton(onClick = { showToExplore = false; vm.viewRoom(room.id) }, modifier = Modifier.fillMaxWidth()) {
+                            Text("${names[room.id]}: ${dir.word}", modifier = Modifier.fillMaxWidth())
+                        }
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { showToExplore = false }) { Text("Close") } },
+        )
     }
     s.editing?.let { id ->
         s.map.room(id)?.let { room ->
@@ -136,6 +180,7 @@ fun MapScreen(vm: MapViewModel, onMaps: () -> Unit) {
                 onRemoveExit = { d -> vm.removeExit(id, d) },
                 onSameAs = { vm.sameRoomAs(it) },
                 onDelete = { vm.deleteRoom(id) },
+                onUnexplored = { d -> vm.toggleUnexplored(id, d) },
                 onClose = vm::closeRoom,
             )
         }
@@ -146,10 +191,28 @@ fun MapScreen(vm: MapViewModel, onMaps: () -> Unit) {
  * Always on screen: the eight compass points around the room you are in, with up, down,
  * in and out beside them. One tap is one move. A filled button already leads somewhere;
  * an outlined one is a way not yet tried; a dimmed one is a way you could not go.
+ * Holding a button marks that way as "mentioned, not tried yet" (green), or clears the mark.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun DirectionPad(map: GameMap, onDirection: (Dir) -> Unit, onHere: () -> Unit) {
+fun DirectionPad(map: GameMap, onDirection: (Dir) -> Unit, onMark: (Dir) -> Unit, onHere: () -> Unit) {
     val here = map.current
+    val marked = map.room(here)?.unexplored.orEmpty()
+    @Composable
+    fun key(d: Dir) {
+        val exit = map.exit(here, d)
+        val todo = exit == null && d in marked
+        val state = when {
+            exit == null -> if (todo) "not tried, mentioned" else "not tried"
+            exit.to == null -> "could not go"
+            else -> "known"
+        }
+        PadKey(
+            text = if (todo) "${d.label}?" else d.label, description = "${d.word}, $state",
+            filled = exit?.to != null, dim = exit != null && exit.to == null, todo = todo,
+            onClick = { onDirection(d) }, onHold = { onMark(d) },
+        )
+    }
     Row(
         Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant).padding(8.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -159,48 +222,45 @@ fun DirectionPad(map: GameMap, onDirection: (Dir) -> Unit, onHere: () -> Unit) {
             for (row in listOf(listOf(Dir.NW, Dir.N, Dir.NE), listOf(Dir.W, null, Dir.E), listOf(Dir.SW, Dir.S, Dir.SE))) {
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     for (d in row) {
-                        if (d == null) PadKey("•", "This room", filled = false, dim = false, onClick = onHere)
-                        else PadKey(d, map.exit(here, d), onDirection)
+                        if (d == null) PadKey("\u2022", "This room", filled = false, dim = false, todo = false, onClick = onHere, onHold = onHere)
+                        else key(d)
                     }
                 }
             }
         }
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             for (row in listOf(listOf(Dir.UP, Dir.IN), listOf(Dir.DOWN, Dir.OUT))) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    for (d in row) PadKey(d, map.exit(here, d), onDirection)
-                }
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { for (d in row) key(d) }
             }
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun PadKey(dir: Dir, exit: Passage?, onDirection: (Dir) -> Unit) {
-    val state = when {
-        exit == null -> "not tried"
-        exit.to == null -> "could not go"
-        else -> "known"
-    }
-    PadKey(
-        text = dir.label, description = "${dir.word}, $state",
-        filled = exit?.to != null, dim = exit != null && exit.to == null,
-    ) { onDirection(dir) }
-}
-
-@Composable
-private fun PadKey(text: String, description: String, filled: Boolean, dim: Boolean, onClick: () -> Unit) {
+private fun PadKey(
+    text: String, description: String, filled: Boolean, dim: Boolean, todo: Boolean,
+    onClick: () -> Unit, onHold: () -> Unit,
+) {
     val scheme = MaterialTheme.colorScheme
     Surface(
         shape = RoundedCornerShape(10.dp),
         color = if (filled) scheme.primaryContainer else scheme.surface,
-        border = BorderStroke(1.dp, if (filled) scheme.primary else scheme.outline),
+        border = when {
+            filled -> BorderStroke(1.dp, scheme.primary)
+            todo -> BorderStroke(2.5.dp, scheme.tertiary)
+            else -> BorderStroke(1.dp, scheme.outline)
+        },
         modifier = Modifier.size(54.dp).alpha(if (dim) 0.4f else 1f)
             .semantics { contentDescription = description }
-            .clickable(onClick = onClick),
+            .combinedClickable(onClick = onClick, onLongClick = onHold),
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Text(text, style = MaterialTheme.typography.titleMedium, fontWeight = if (filled) FontWeight.Bold else FontWeight.Normal)
+            Text(
+                text, style = MaterialTheme.typography.titleMedium,
+                color = if (todo) scheme.tertiary else scheme.onSurface,
+                fontWeight = if (filled || todo) FontWeight.Bold else FontWeight.Normal,
+            )
         }
     }
 }
@@ -314,7 +374,8 @@ private fun RoomGlance(room: Room, map: GameMap, names: Map<String, String>, onC
                         Text(room.items, style = MaterialTheme.typography.bodyLarge)
                     }
                     val exits = map.exitsOf(room.id).sortedBy { it.dir.ordinal }
-                    if (exits.isNotEmpty()) {
+                    val untried = room.unexplored.filter { map.exit(room.id, it) == null }
+                    if (exits.isNotEmpty() || untried.isNotEmpty()) {
                         Text("Exits", style = MaterialTheme.typography.titleSmall, color = scheme.secondary, modifier = Modifier.padding(top = 12.dp))
                         for (e in exits) {
                             val to = e.to
@@ -324,6 +385,9 @@ private fun RoomGlance(room: Room, map: GameMap, names: Map<String, String>, onC
                                 else -> (names[to] ?: "") + if (e.oneWay) " (one-way)" else ""
                             }
                             Text("${e.dir.word}: $where", style = MaterialTheme.typography.bodyLarge)
+                        }
+                        for (d in untried) {
+                            Text("${d.word}: not tried yet", style = MaterialTheme.typography.bodyLarge, color = scheme.tertiary)
                         }
                     }
                     Text(
@@ -341,6 +405,7 @@ private fun RoomGlance(room: Room, map: GameMap, names: Map<String, String>, onC
  * A room's card: what it is called, what the game says about it, what is lying there, and
  * every way to put right something that only became clear later.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun RoomCard(
     room: Room,
@@ -353,6 +418,7 @@ private fun RoomCard(
     onRemoveExit: (Dir) -> Unit,
     onSameAs: (String) -> Unit,
     onDelete: () -> Unit,
+    onUnexplored: (Dir) -> Unit,
     onClose: () -> Unit,
 ) {
     var name by remember(room.id) { mutableStateOf(room.name) }
@@ -405,6 +471,15 @@ private fun RoomCard(
                         Spacer(Modifier.weight(1f))
                         TextButton(onClick = { picking = Pick.Redirect(e.dir) }) { Text("Leads elsewhere") }
                         TextButton(onClick = { onRemoveExit(e.dir) }) { Text("Remove") }
+                    }
+                }
+                val free = Dir.entries.filter { map.exit(room.id, it) == null }
+                if (free.isNotEmpty()) {
+                    Text("Exits mentioned but not tried", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 14.dp))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        for (d in free) {
+                            FilterChip(selected = d in room.unexplored, onClick = { onUnexplored(d) }, label = { Text(d.label) })
+                        }
                     }
                 }
                 Text("This room", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 14.dp))
