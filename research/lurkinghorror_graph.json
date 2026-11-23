@@ -1,0 +1,1331 @@
+{
+ "start": "TERMINAL-ROOM",
+ "rooms": {
+  "SMITH-ST": {
+   "desc": "Smith Street",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "COMP-CENTER"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "SMITH-ST-2"
+    },
+    "WEST": {
+     "kind": "blocked"
+    },
+    "IN": {
+     "kind": "to",
+     "to": "COMP-CENTER"
+    }
+   }
+  },
+  "SMITH-ST-2": {
+   "desc": "Smith Street",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "TEMPORARY-LAB"
+    },
+    "EAST": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "SMITH-ST"
+    },
+    "IN": {
+     "kind": "to",
+     "to": "TEMPORARY-LAB"
+    }
+   }
+  },
+  "COMP-CENTER": {
+   "desc": "Computer Center",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "SMITH-ST"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "CS-2ND"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "CS-BASEMENT"
+    },
+    "SOUTH": {
+     "kind": "cond",
+     "to": "CS-ELEVATOR-ROOM"
+    },
+    "IN": {
+     "kind": "cond",
+     "to": "CS-ELEVATOR-ROOM"
+    }
+   }
+  },
+  "CS-2ND": {
+   "desc": "Second Floor",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "TERMINAL-ROOM"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "KITCHEN"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "CS-3RD"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "COMP-CENTER"
+    },
+    "SOUTH": {
+     "kind": "cond",
+     "to": "CS-ELEVATOR-ROOM"
+    },
+    "IN": {
+     "kind": "cond",
+     "to": "CS-ELEVATOR-ROOM"
+    }
+   }
+  },
+  "CS-3RD": {
+   "desc": "Third Floor",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "blocked"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "CS-ROOF"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "CS-2ND"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "CS-ROOF"
+    },
+    "SOUTH": {
+     "kind": "cond",
+     "to": "CS-ELEVATOR-ROOM"
+    },
+    "IN": {
+     "kind": "cond",
+     "to": "CS-ELEVATOR-ROOM"
+    }
+   }
+  },
+  "CS-ROOF": {
+   "desc": "Roof",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "DOWN": {
+     "kind": "to",
+     "to": "CS-3RD"
+    },
+    "IN": {
+     "kind": "to",
+     "to": "CS-3RD"
+    }
+   }
+  },
+  "TERMINAL-ROOM": {
+   "desc": "Terminal Room",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "cond",
+     "to": "CS-2ND"
+    },
+    "OUT": {
+     "kind": "cond",
+     "to": "CS-2ND"
+    }
+   }
+  },
+  "CS-BASEMENT": {
+   "desc": "Basement",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "cond",
+     "to": "CS-ELEVATOR-ROOM"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "TEMPORARY-BASEMENT"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "AERO-BASEMENT"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "COMP-CENTER"
+    },
+    "DOWN": {
+     "kind": "cond",
+     "to": "ELEVATOR-PIT"
+    },
+    "IN": {
+     "kind": "cond",
+     "to": "CS-ELEVATOR-ROOM"
+    }
+   }
+  },
+  "TEMPORARY-BASEMENT": {
+   "desc": "Temporary Basement",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "DEAD-STORAGE"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "CS-BASEMENT"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "TEMPORARY-LAB"
+    }
+   }
+  },
+  "DEAD-STORAGE": {
+   "desc": "Dead Storage",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "cond",
+     "to": "STORAGE-ROOM"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "TEMPORARY-BASEMENT"
+    },
+    "IN": {
+     "kind": "cond",
+     "to": "STORAGE-ROOM"
+    }
+   }
+  },
+  "STORAGE-ROOM": {
+   "desc": "Ancient Storage",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "DEAD-STORAGE"
+    },
+    "DOWN": {
+     "kind": "cond",
+     "to": "BRICK-TUNNEL"
+    }
+   }
+  },
+  "BRICK-TUNNEL": {
+   "desc": "Brick Tunnel",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "CAVE-ROOM"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "UNDER-ALCHEMY-LAB"
+    },
+    "UP": {
+     "kind": "cond",
+     "to": "STORAGE-ROOM"
+    }
+   }
+  },
+  "CAVE-ROOM": {
+   "desc": "Renovated Cave",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "BRICK-TUNNEL"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "CAVE-ALTAR"
+    }
+   }
+  },
+  "CAVE-ALTAR": {
+   "desc": "Before the Altar",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "UP": {
+     "kind": "to",
+     "to": "CAVE-ROOM"
+    }
+   }
+  },
+  "UNDER-ALCHEMY-LAB": {
+   "desc": "Cinderblock Tunnel",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "BRICK-TUNNEL"
+    },
+    "UP": {
+     "kind": "cond",
+     "to": "ALCHEMY-LAB"
+    }
+   }
+  },
+  "TEMPORARY-LAB": {
+   "desc": "Temporary Lab",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "SMITH-ST-2"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "TEMPORARY-BASEMENT"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "SMITH-ST-2"
+    }
+   }
+  },
+  "CS-ELEVATOR-ROOM": {
+   "desc": "Elevator",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "varies",
+     "any": [
+      "COMP-CENTER",
+      "CS-2ND",
+      "CS-3RD",
+      "CS-BASEMENT"
+     ]
+    },
+    "OUT": {
+     "kind": "varies",
+     "any": [
+      "COMP-CENTER",
+      "CS-2ND",
+      "CS-3RD",
+      "CS-BASEMENT"
+     ]
+    }
+   }
+  },
+  "AERO-STAIRS": {
+   "desc": "Stairway",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "AERO-BASEMENT"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "AERO-LOBBY"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "SUB-BASEMENT"
+    }
+   }
+  },
+  "AERO-BASEMENT": {
+   "desc": "Aero Basement",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "CS-BASEMENT"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "AERO-STAIRS"
+    }
+   }
+  },
+  "SUB-BASEMENT": {
+   "desc": "Subbasement",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NW": {
+     "kind": "cond",
+     "to": "TOMB"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "AERO-STAIRS"
+    }
+   }
+  },
+  "TOMB": {
+   "desc": "Tomb",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SE": {
+     "kind": "cond",
+     "to": "SUB-BASEMENT"
+    },
+    "DOWN": {
+     "kind": "cond",
+     "to": "TUNNEL"
+    },
+    "OUT": {
+     "kind": "cond",
+     "to": "SUB-BASEMENT"
+    }
+   }
+  },
+  "TUNNEL": {
+   "desc": "Steam Tunnel",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "cond",
+     "to": "TUNNEL-EAST"
+    },
+    "WEST": {
+     "kind": "cond",
+     "to": "TUNNEL-WEST"
+    },
+    "UP": {
+     "kind": "cond",
+     "to": "TOMB"
+    }
+   }
+  },
+  "TUNNEL-EAST": {
+   "desc": "Steam Tunnel",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "STEAM-TUNNEL"
+    },
+    "WEST": {
+     "kind": "cond",
+     "to": "TUNNEL"
+    }
+   }
+  },
+  "STEAM-TUNNEL": {
+   "desc": "Steam Tunnel",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "STEAM-TUNNEL-EAST"
+    },
+    "WEST": {
+     "kind": "cond",
+     "to": "TUNNEL-EAST"
+    }
+   }
+  },
+  "STEAM-TUNNEL-EAST": {
+   "desc": "Steam Tunnel",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "cond",
+     "to": "ELEVATOR-PIT"
+    },
+    "EAST": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "cond",
+     "to": "STEAM-TUNNEL"
+    }
+   }
+  },
+  "ELEVATOR-PIT": {
+   "desc": "Concrete Box",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "cond",
+     "to": "STEAM-TUNNEL-EAST"
+    },
+    "UP": {
+     "kind": "cond",
+     "to": "CS-BASEMENT"
+    },
+    "OUT": {
+     "kind": "cond",
+     "to": "CS-BASEMENT"
+    }
+   }
+  },
+  "TUNNEL-WEST": {
+   "desc": "Steam Tunnel",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "TUNNEL"
+    },
+    "WEST": {
+     "kind": "cond",
+     "to": "TUNNEL-ENTRANCE"
+    }
+   }
+  },
+  "MASS-AVE": {
+   "desc": "Mass. Ave.",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "INF-1"
+    },
+    "IN": {
+     "kind": "to",
+     "to": "INF-1"
+    }
+   }
+  },
+  "CHEMISTRY-BLDG": {
+   "desc": "Chemistry Building",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "INF-5"
+    },
+    "SOUTH": {
+     "kind": "cond",
+     "to": "ALCHEMY-DEPT"
+    }
+   }
+  },
+  "ALCHEMY-DEPT": {
+   "desc": "Department of Alchemy",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "cond",
+     "to": "CHEMISTRY-BLDG"
+    },
+    "SOUTH": {
+     "kind": "cond",
+     "to": "ALCHEMY-LAB"
+    }
+   }
+  },
+  "ALCHEMY-LAB": {
+   "desc": "Lab",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "cond",
+     "to": "ALCHEMY-DEPT"
+    },
+    "DOWN": {
+     "kind": "cond",
+     "to": "UNDER-ALCHEMY-LAB"
+    }
+   }
+  },
+  "ENGINEERING-BLDG": {
+   "desc": "Engineering Building",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "INF-1"
+    },
+    "SOUTH": {
+     "kind": "blocked"
+    },
+    "EAST": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "blocked"
+    }
+   }
+  },
+  "INF-1": {
+   "desc": "Infinite Corridor",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "AERO-LOBBY"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "ENGINEERING-BLDG"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MASS-AVE"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "MASS-AVE"
+    },
+    "EAST": {
+     "kind": "cond",
+     "to": "INF-2"
+    }
+   }
+  },
+  "INF-2": {
+   "desc": "Infinite Corridor",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "blocked"
+    },
+    "SOUTH": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "INF-1"
+    },
+    "EAST": {
+     "kind": "cond",
+     "to": "INF-3"
+    }
+   }
+  },
+  "INF-3": {
+   "desc": "Infinite Corridor",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "cond",
+     "to": "GREAT-COURT"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "INF-2"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "GREAT-DOME"
+    },
+    "OUT": {
+     "kind": "cond",
+     "to": "GREAT-COURT"
+    },
+    "EAST": {
+     "kind": "cond",
+     "to": "INF-4"
+    }
+   }
+  },
+  "INF-4": {
+   "desc": "Infinite Corridor",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "blocked"
+    },
+    "SOUTH": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "INF-3"
+    },
+    "EAST": {
+     "kind": "cond",
+     "to": "INF-5"
+    }
+   }
+  },
+  "INF-5": {
+   "desc": "Infinite Corridor",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "INF-4"
+    },
+    "NORTH": {
+     "kind": "cond",
+     "to": "NUTRITION-BLDG"
+    },
+    "SOUTH": {
+     "kind": "cond",
+     "to": "CHEMISTRY-BLDG"
+    }
+   }
+  },
+  "NUTRITION-BLDG": {
+   "desc": "Fruits and Nuts",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "INF-5"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "BROWN-TUNNEL"
+    }
+   }
+  },
+  "BROWN-TUNNEL": {
+   "desc": "Cluttered Passage",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SE": {
+     "kind": "to",
+     "to": "BROWN-BASEMENT"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "NUTRITION-BLDG"
+    }
+   }
+  },
+  "AERO-LOBBY": {
+   "desc": "Aero Lobby",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "INF-1"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "AERO-STAIRS"
+    }
+   }
+  },
+  "GREAT-DOME": {
+   "desc": "Great Dome",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "UP": {
+     "kind": "cond",
+     "to": "TOP-OF-DOME"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "INF-3"
+    }
+   }
+  },
+  "TOP-OF-DOME": {
+   "desc": "Top of Dome",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "cond",
+     "to": "DOME-ROOF"
+    },
+    "OUT": {
+     "kind": "cond",
+     "to": "DOME-ROOF"
+    },
+    "DOWN": {
+     "kind": "cond",
+     "to": "GREAT-DOME"
+    }
+   }
+  },
+  "DOME-ROOF": {
+   "desc": "Roof of Great Dome",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "cond",
+     "to": "TOP-OF-DOME"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "ON-DOME"
+    },
+    "IN": {
+     "kind": "cond",
+     "to": "TOP-OF-DOME"
+    }
+   }
+  },
+  "ON-DOME": {
+   "desc": "On the Great Dome",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "DOWN": {
+     "kind": "to",
+     "to": "DOME-ROOF"
+    }
+   }
+  },
+  "TUNNEL-ENTRANCE": {
+   "desc": "Tunnel Entrance",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "TUNNEL-WEST"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MUDDY-TUNNEL"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "MUDDY-TUNNEL"
+    },
+    "IN": {
+     "kind": "to",
+     "to": "MUDDY-TUNNEL"
+    }
+   }
+  },
+  "MUDDY-TUNNEL": {
+   "desc": "Muddy Tunnel",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "TUNNEL-ENTRANCE"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "TUNNEL-ENTRANCE"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "LARGE-CHAMBER"
+    }
+   }
+  },
+  "LARGE-CHAMBER": {
+   "desc": "Large Chamber",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "UP": {
+     "kind": "to",
+     "to": "MUDDY-TUNNEL"
+    },
+    "DOWN": {
+     "kind": "cond",
+     "to": "LAIR-1"
+    }
+   }
+  },
+  "LAIR-1": {
+   "desc": "Wet Tunnel",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "LAIR-2"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "LAIR-6"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "LAIR-1"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "LARGE-CHAMBER"
+    }
+   }
+  },
+  "LAIR-2": {
+   "desc": "Wet Tunnel",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "LAIR-1"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "LAIR-7"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "LAIR-8"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "LAIR-3"
+    }
+   }
+  },
+  "LAIR-3": {
+   "desc": "Wet Tunnel",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "LAIR-6"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "LAIR-4"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "LAIR-2"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "LAIR-7"
+    }
+   }
+  },
+  "LAIR-4": {
+   "desc": "Wet Tunnel",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "LAIR-5"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "LAIR-10"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "LAIR-11"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "LAIR-3"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "LAIR-10"
+    }
+   }
+  },
+  "LAIR-5": {
+   "desc": "Wet Tunnel",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "LAIR-4"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "LAIR-11"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "LAIR-3"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "LAIR-5"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "OUTER-LAIR"
+    }
+   }
+  },
+  "LAIR-6": {
+   "desc": "Wet Tunnel",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "LAIR-6"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "LAIR-1"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "LAIR-3"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "LAIR-8"
+    }
+   }
+  },
+  "LAIR-7": {
+   "desc": "Wet Tunnel",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "LAIR-2"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "LAIR-3"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "LAIR-1"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "LAIR-10"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "LAIR-7"
+    }
+   }
+  },
+  "LAIR-8": {
+   "desc": "Wet Tunnel",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "LAIR-2"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "LAIR-6"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "LAIR-9"
+    }
+   }
+  },
+  "LAIR-9": {
+   "desc": "Wet Tunnel",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "LAIR-6"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "LAIR-8"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "LAIR-2"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "LAIR-10"
+    }
+   }
+  },
+  "LAIR-10": {
+   "desc": "Wet Tunnel",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "LAIR-10"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "LAIR-7"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "LAIR-9"
+    }
+   }
+  },
+  "LAIR-11": {
+   "desc": "Wet Tunnel",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "LAIR-11"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "LAIR-9"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "LAIR-11"
+    }
+   }
+  },
+  "OUTER-LAIR": {
+   "desc": "Wet Tunnel",
+   "dark": false,
+   "maze": true,
+   "exits": {
+    "SOUTH": {
+     "kind": "cond",
+     "to": "INNER-LAIR"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "LAIR-5"
+    },
+    "IN": {
+     "kind": "cond",
+     "to": "INNER-LAIR"
+    }
+   }
+  },
+  "INNER-LAIR": {
+   "desc": "Inner Lair",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "UP": {
+     "kind": "cond",
+     "to": "OUTER-LAIR"
+    }
+   }
+  },
+  "BROWN-BUILDING": {
+   "desc": "Brown Building",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "COURTYARD"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "BROWN-TOP-FLOOR"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "BROWN-BASEMENT"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "COURTYARD"
+    }
+   }
+  },
+  "COURTYARD": {
+   "desc": "Small Courtyard",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "BROWN-BUILDING"
+    },
+    "IN": {
+     "kind": "to",
+     "to": "BROWN-BUILDING"
+    }
+   }
+  },
+  "GREAT-COURT": {
+   "desc": "Great Court",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "blocked"
+    }
+   }
+  },
+  "BROWN-BASEMENT": {
+   "desc": "Brown Basement",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NW": {
+     "kind": "to",
+     "to": "BROWN-TUNNEL"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "BROWN-BUILDING"
+    }
+   }
+  },
+  "BROWN-TOP-FLOOR": {
+   "desc": "Top Floor",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "cond",
+     "to": "BROWN-ROOF"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "BROWN-BUILDING"
+    },
+    "OUT": {
+     "kind": "cond",
+     "to": "BROWN-ROOF"
+    }
+   }
+  },
+  "BROWN-ROOF": {
+   "desc": "Skyscraper Roof",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "cond",
+     "to": "BROWN-TOP-FLOOR"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "INSIDE-DOME"
+    },
+    "IN": {
+     "kind": "cond",
+     "to": "BROWN-TOP-FLOOR"
+    }
+   }
+  },
+  "INSIDE-DOME": {
+   "desc": "Inside Dome",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "DOWN": {
+     "kind": "cond",
+     "to": "BROWN-ROOF"
+    },
+    "OUT": {
+     "kind": "cond",
+     "to": "BROWN-ROOF"
+    }
+   }
+  },
+  "KITCHEN": {
+   "desc": "Kitchen",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "CS-2ND"
+    }
+   }
+  },
+  "YUGGOTH": {
+   "desc": "Place",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "DOWN": {
+     "kind": "to",
+     "to": "BOWL-ROOM"
+    }
+   }
+  },
+  "BOWL-ROOM": {
+   "desc": "Basalt Bowl",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "UP": {
+     "kind": "to",
+     "to": "YUGGOTH"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "PLATFORM-ROOM"
+    },
+    "IN": {
+     "kind": "to",
+     "to": "PLATFORM-ROOM"
+    }
+   }
+  },
+  "PLATFORM-ROOM": {
+   "desc": "At Platform",
+   "dark": false,
+   "maze": false,
+   "exits": {}
+  }
+ }
+}

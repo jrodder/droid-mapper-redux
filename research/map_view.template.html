@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zork I auto-layout</title>
+<style>
+  :root { --bg:#f4f1ea; --ink:#22201c; --muted:#6d675c; --box:#fffdf8; --line:#22201c;
+          --here:#c2410c; --moved:#f5c36b; --maze:#f3d9a0; --panel:#ebe6da; --todo:#1d7a4f; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#1b1a17; --ink:#ece7dc; --muted:#a39c8e; --box:#2a2823; --line:#ece7dc;
+            --here:#fb923c; --moved:#7a5a17; --maze:#6b5220; --panel:#25231f; --todo:#5fd39b; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.4 system-ui, sans-serif; }
+  header { position:sticky; top:0; z-index:2; background:var(--panel); padding:10px 16px;
+           display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; border-bottom:1px solid var(--muted); }
+  header label { display:flex; gap:6px; align-items:center; }
+  #step { width:min(420px, 60vw); }
+  button, select { font:inherit; padding:4px 10px; color:var(--ink); background:var(--box);
+                   border:1px solid var(--muted); border-radius:4px; }
+  #what { flex-basis:100%; color:var(--muted); min-height:1.4em; }
+  #stats { flex-basis:100%; }
+  #wrap { overflow:auto; padding:16px; }
+  svg { display:block; }
+  .room rect { fill:var(--box); stroke:var(--line); stroke-width:1.6; }
+  .room.maze rect { fill:var(--maze); }
+  .room.moved rect { fill:var(--moved); }
+  .room.here rect { stroke:var(--here); stroke-width:4; }
+  .room text { fill:var(--ink); font:600 10.5px system-ui, sans-serif; text-anchor:middle; }
+  .pass { fill:none; stroke:var(--line); stroke-width:1.8; }
+  .pass.cond { stroke-dasharray:3 4; }
+  .pass.bent { stroke:var(--muted); }
+  .tag { fill:var(--here); font:700 11px system-ui, sans-serif; }
+  .area { fill:none; stroke:var(--muted); stroke-width:1; stroke-dasharray:2 5; }
+  .stub { fill:var(--ink); font:italic 11px system-ui, sans-serif; }
+  .todo { stroke:var(--todo); stroke-width:2; fill:none; }
+  .todo.ring { fill:var(--bg); }
+  .todo-t { fill:var(--todo); font:700 11px system-ui, sans-serif; }
+  .stub, .tag, .todo-t { paint-order:stroke; stroke:var(--bg); stroke-width:3.5px; stroke-linejoin:round; }
+  .legend { display:flex; flex-wrap:wrap; gap:4px 16px; color:var(--muted); font-size:12.5px; flex-basis:100%; }
+  .sw { display:inline-block; width:14px; height:10px; border:1.5px solid var(--line); vertical-align:middle; margin-right:4px; }
+</style>
+</head>
+<body>
+<header>
+  <label>Playthrough <select id="run"></select></label>
+  <button id="prev">◀</button>
+  <input id="step" type="range" min="0" value="0">
+  <button id="next">▶</button>
+  <button id="play">Play</button>
+  <label><input id="cut" type="checkbox" checked> Cut long links into labels</label>
+  <label>Zoom <input id="zoom" type="range" min="30" max="140" value="70"></label>
+  <div id="stats"></div>
+  <div id="what"></div>
+  <div class="legend">
+    <span>Solid black line: passage drawn in the direction travelled</span>
+    <span>Grey curve: passage that had to be bent</span>
+    <span>Dotted outline: one area</span>
+    <span>Italic "to Room": a link between areas, or one that would cross other lines, as a label at each end</span>
+    <span>Plain line: assumed two-way until marked otherwise</span>
+    <span>Arrow: marked one-way by the player</span>
+    <span>Dotted: needs a puzzle solved</span>
+    <span>U / D / In / Out: non-compass move</span>
+    <span>Small circle: leads back to the same room</span>
+    <span><i class="sw" style="background:var(--moved)"></i>moved by the app this step</span>
+    <span><i class="sw" style="background:var(--maze)"></i>a tangle of same-named rooms folded into one box</span>
+    <span style="color:var(--todo)">Green stub with a ring, or "U?" / "D?": an exit not walked yet</span>
+  </div>
+</header>
+<div id="wrap"><svg id="map" xmlns="http://www.w3.org/2000/svg"></svg></div>
+<script>
+const D = /*DATA*/;
+const CW = 132, CH = 96, BW = 96, BH = 50;   // gaps between rooms are wide enough to hold a label
+const VEC = {NORTH:[0,-1],SOUTH:[0,1],EAST:[1,0],WEST:[-1,0],NE:[1,-1],NW:[-1,-1],SE:[1,1],SW:[-1,1]};
+const OPP = {NORTH:"SOUTH",SOUTH:"NORTH",EAST:"WEST",WEST:"EAST",NE:"SW",SW:"NE",NW:"SE",SE:"NW"};
+const SHORT = {UP:"U",DOWN:"D",IN:"In",OUT:"Out",LAND:"Land"};
+const BACK = Object.assign({UP:"DOWN",DOWN:"UP",IN:"OUT",OUT:"IN"}, OPP);
+let maze = new Set();
+const $ = id => document.getElementById(id);
+let run = D.runs[0], timer = null;
+
+function state(k) {
+  const pos = Object.assign({}, run.init), pass = [], tried = {}, loops = [], walked = new Set();
+  const labels = Object.assign({}, run.labels), tangle = new Set(), assumed = new Set();
+  let moved = new Set(), last = null;
+  for (let i = 0; i < k; i++) {
+    const s = run.steps[i];
+    if (s.m) {                           // two maze boxes turned out to be one maze
+      for (const gone in s.m) {
+        delete pos[gone];
+        for (const q of pass) { if (q.f === gone) q.f = s.m[gone]; if (q.t === gone) q.t = s.m[gone]; }
+      }
+    }
+    if (s.l) for (const b in s.l) { labels[b] = s.l[b]; tangle.add(b); }   // a tangle box formed or grew
+    for (const r in s.p) pos[r] = s.p[r];
+    if (s.d === "JUMP" || s.d === "INSIDE") { /* no passage to draw on this map */ }
+    else {
+      tried[s.f] = (tried[s.f] || 0) + 1;
+      walked.add(s.f + "|" + s.d);
+      // Every passage is assumed to lead back the way it came until the player says otherwise,
+      // so the return is a known line, not an unexplored exit.
+      if (BACK[s.d] && s.f !== s.t) assumed.add(s.t + "|" + BACK[s.d]);
+      if (s.f === s.t) loops.push(s); else pass.push(Object.assign({}, s));
+    }
+    if (i === k - 1) { last = s; moved = new Set(Object.keys(s.p).filter(r => !(s.n && r === s.t))); }
+  }
+  // positions arrive already placed on the page; areas stay where they were first put
+  const area = {}, boxes = {}, gpos = {};
+  for (const r in pos) {
+    const [a, x, y] = pos[r];
+    area[r] = a; gpos[r] = [x, y];
+    const b = boxes[a] || (boxes[a] = {x0:x, y0:y, x1:x, y1:y});
+    b.x0 = Math.min(b.x0, x); b.y0 = Math.min(b.y0, y); b.x1 = Math.max(b.x1, x); b.y1 = Math.max(b.y1, y);
+  }
+  for (const a in boxes) { const b = boxes[a]; b.gx = b.x0; b.gy = b.y0; b.w = b.x1 - b.x0 + 1; b.h = b.y1 - b.y0 + 1; }
+  const pairsOk = pass.filter(q => q.f !== q.t && gpos[q.f] && gpos[q.t]);
+  return {pos: gpos, area, boxes, nAreas: Object.keys(boxes).length, pass: pairsOk, tried, loops, moved, last,
+          walked, assumed, labels, tangle, forced: new Set(last ? last.k : [])};
+}
+function aligned(a, b, v) {
+  const dx = b[0]-a[0], dy = b[1]-a[1];
+  return dx*v[1] === dy*v[0] && dx*v[0] + dy*v[1] > 0;
+}
+function clearLine(S, a, b, v) {     // aligned and no room in between
+  const pa = S.pos[a], pb = S.pos[b];
+  if (!aligned(pa, pb, v)) return false;
+  for (let x = pa[0]+v[0], y = pa[1]+v[1]; x !== pb[0] || y !== pb[1]; x += v[0], y += v[1])
+    if (S.taken.has(x + "," + y)) return false;
+  return true;
+}
+function facing(a, b) {            // unit-ish grid vector from a toward b
+  const ang = Math.atan2(b[1]-a[1], b[0]-a[0]), o = Math.round(ang / (Math.PI/4));
+  return [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]][(o + 8) % 8];
+}
+function centre(p) { return [p[0]*CW, p[1]*CH]; }
+function port(p, v) { const c = centre(p); return [c[0] + v[0]*BW/2, c[1] + v[1]*BH/2]; }
+function el(tag, attrs, text) {
+  const e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  return e;
+}
+function wrapLabel(s) {
+  const words = s.split(" "), lines = [""];
+  for (const w of words) {
+    const cur = lines[lines.length-1];
+    if (cur && (cur + " " + w).length > 15) lines.push(w); else lines[lines.length-1] = cur ? cur + " " + w : w;
+  }
+  return lines;
+}
+
+function draw(k) {
+  const S = state(k), svg = $("map");
+  S.taken = new Set(Object.values(S.pos).map(p => p[0] + "," + p[1]));
+  svg.replaceChildren();
+  const defs = el("defs", {});
+  const mk = el("marker", {id:"arrow", viewBox:"0 0 10 10", refX:"9", refY:"5", markerWidth:"8", markerHeight:"8", orient:"auto-start-reverse"});
+  mk.appendChild(el("path", {d:"M0,0 L10,5 L0,10 z", fill:"context-stroke"}));
+  defs.appendChild(mk); svg.appendChild(defs);
+
+  // one drawn line per pair of rooms, as on published maps
+  const pairs = new Map();
+  for (const s of S.pass) {
+    const key = s.f < s.t ? s.f + "|" + s.t : s.t + "|" + s.f;
+    if (!pairs.has(key)) pairs.set(key, []);
+    pairs.get(key).push(s);
+  }
+  let nStraight = 0, nBent = 0, nCut = 0, nOver = 0;
+  // labels are never drawn over a room or over another label: each one tries a
+  // series of spots near its line end and takes the first that is free
+  const obs = Object.values(S.pos).map(p => {
+    const c = centre(p); return [c[0]-BW/2-2, c[1]-BH/2-2, c[0]+BW/2+2, c[1]+BH/2+2];
+  });
+  function place(q, u, tag, cls, sides) {
+    const w = tag.length * (cls === "stub" ? 5.9 : 7) + 4;
+    if (cls === "todo-t") u = [u[0], u[1]];
+    const anchor = u[0] > 0.3 ? "start" : u[0] < -0.3 ? "end" : "middle";
+    let pick = null;
+    search:
+    for (const along of [0, 6, 12, 20, 30, 44, 60, 80])
+      for (const side of sides) {
+        const x = q[0] + u[0]*(along + 3) - u[1]*side, y = q[1] + u[1]*(along + 8) + u[0]*side + 4;
+        const x0 = anchor === "start" ? x : anchor === "end" ? x - w : x - w/2;
+        const r = [x0, y - 10, x0 + w, y + 3];
+        const hit = obs.some(o => r[0] < o[2] && r[2] > o[0] && r[1] < o[3] && r[3] > o[1]);
+        if (!pick || !hit) pick = {x, y, r, hit};
+        if (!hit) break search;
+      }
+    if (pick.hit) nOver++;
+    obs.push(pick.r);
+    gt.appendChild(el("text", {x:pick.x, y:pick.y, class:cls, "text-anchor":anchor}, tag));
+  }
+  const cut = $("cut").checked;
+  const gl = el("g", {}), gt = el("g", {});
+  for (const list of pairs.values()) {
+    const a = list[0].f, b = list[0].t;
+    const ab = list.filter(s => s.f === a), ba = list.filter(s => s.f === b);
+    // prefer the exit that the drawing already shows correctly, then a matched
+    // straight pair, then any compass exit; duplicates are dropped as on published maps
+    const isClear = s => VEC[s.d] && clearLine(S, s.f, s.t, VEC[s.d]);
+    const rev = ba.find(isClear);
+    let out = ab.find(s => isClear(s) && ba.some(r => r.d === OPP[s.d])) || ab.find(isClear)
+      || (rev && ab.find(s => s.d === OPP[rev.d]))
+      || ab.find(s => VEC[s.d] && ba.some(r => r.d === OPP[s.d])) || ab.find(s => VEC[s.d]) || ab[0];
+    let back = ba.find(s => s.d === OPP[out.d]) || ba.find(s => VEC[s.d]) || ba[0];
+    const pa = S.pos[a], pb = S.pos[b];
+    const va = VEC[out.d] || facing(pa, pb);
+    const vb = back ? (VEC[back.d] || facing(pb, pa)) : (VEC[out.d] ? VEC[OPP[out.d]] : facing(pb, pa));
+    const p1 = port(pa, va), p2 = port(pb, vb);
+    const blocked = VEC[out.d] && aligned(pa, pb, va) && !clearLine(S, a, b, va);
+    const cross = S.area[a] !== S.area[b];
+    const straight = !cross && VEC[out.d] && clearLine(S, a, b, va) && (!back || !VEC[back.d] || back.d === OPP[out.d]);
+    const far = Math.max(Math.abs(pb[0]-pa[0]), Math.abs(pb[1]-pa[1])) > 3;
+    const condAll = list.every(s => s.c);
+    const forced = S.forced.has(a < b ? a + "|" + b : b + "|" + a);   // a curve here would cross something
+    if (cross || (forced && !straight) || (cut && far && !straight)) {
+      // as on the published map: a short stub at each end naming the other room
+      nCut++;
+      const ends = [[p1, va, b, out, "to"], [p2, vb, a, back, back ? "to" : "from"]];
+      for (const [p, v, other, s, word] of ends) {
+        const m = Math.hypot(v[0], v[1]), u = [v[0]/m, v[1]/m], q = [p[0]+u[0]*10, p[1]+u[1]*10];
+        gl.appendChild(el("path", {d:`M${p} L${q}`, class:"pass" + (condAll ? " cond" : "")}));
+        const tag = (s && SHORT[s.d] ? SHORT[s.d] + " " : "") + `${word} ${S.labels[other]}`;
+        place(q, u, tag, "stub", [0, 9, -9, 16, -16, 24, -24, 32, -32, 40, -40, 48, -48]);
+      }
+      continue;
+    }
+    let d;
+    if (straight || (!VEC[out.d] && (!back || !VEC[back.d]))) {
+      d = `M${p1} L${p2}`;
+    } else {
+      const dist = Math.hypot(p2[0]-p1[0], p2[1]-p1[1]), t = Math.max(34, Math.min(150, dist*0.45));
+      const n = v => { const m = Math.hypot(v[0], v[1]); return [v[0]/m, v[1]/m]; };
+      const ua = n(va), ub = n(vb);
+      // if both ends run along the line between the ports the curve would fold
+      // onto itself (or run behind rooms): bow it out sideways into the gap between rows
+      const c = [(p2[0]-p1[0])/dist, (p2[1]-p1[1])/dist];
+      const flat = v => Math.abs(v[0]*c[1] - v[1]*c[0]) < 0.35;
+      let bx = 0, by = 0, tt = t;
+      if (blocked || (flat(ua) && flat(ub))) {
+        const bow = Math.abs(c[0]) > Math.abs(c[1]) ? 56 : 86;
+        bx = -c[1]*bow; by = c[0]*bow; tt = t*0.5;
+      }
+      d = `M${p1} C${p1[0]+ua[0]*tt+bx},${p1[1]+ua[1]*tt+by} ${p2[0]+ub[0]*tt+bx},${p2[1]+ub[1]*tt+by} ${p2}`;
+    }
+    if (VEC[out.d] || (back && VEC[back.d])) { if (straight) nStraight++; else nBent++; }
+    const cond = list.every(s => s.c);
+    // One-way is the player's mark, never the app's inference. The simulated player marks a
+    // passage one-way once they have tried every exit of the room it led to and none came back.
+    const oneWay = !back && !S.tangle.has(b) && (S.tried[b] || 0) >= run.exits[b];
+    const path = el("path", {d, class:"pass" + (cond ? " cond" : "") + (straight || !VEC[out.d] ? "" : " bent")});
+    if (oneWay) path.setAttribute("marker-end", "url(#arrow)");
+    gl.appendChild(path);
+    for (const [s, p, v] of [[out, p1, va], [back, p2, vb]]) {
+      if (s && SHORT[s.d]) {
+        const m = Math.hypot(v[0], v[1]);
+        place(p, [v[0]/m, v[1]/m], SHORT[s.d], "tag", [9, -9, 16, -16]);   // beside the line, not on it
+      }
+    }
+  }
+  // exits you have read about but not walked yet: a short stub ending in an open ring
+  let nTodo = 0;
+  for (const r in S.pos) {
+    for (const d of (S.tangle.has(r) ? [] : run.open[r] || [])) {
+      if (S.walked.has(r + "|" + d) || S.assumed.has(r + "|" + d)) continue;
+      nTodo++;
+      if (VEC[d]) {
+        const v = VEC[d], m = Math.hypot(v[0], v[1]), u = [v[0]/m, v[1]/m], p = port(S.pos[r], v);
+        gl.appendChild(el("path", {d:`M${p} L${p[0]+u[0]*11},${p[1]+u[1]*11}`, class:"todo"}));
+        gl.appendChild(el("circle", {cx:p[0]+u[0]*15, cy:p[1]+u[1]*15, r:4, class:"todo ring"}));
+        obs.push([p[0]+u[0]*15-6, p[1]+u[1]*15-6, p[0]+u[0]*15+6, p[1]+u[1]*15+6]);
+      } else {
+        const up = d === "UP", c = centre(S.pos[r]);
+        place([c[0] + BW/2 - 14, c[1] + (up ? -BH/2 : BH/2)], [0, up ? -1 : 1], (SHORT[d] || d) + "?", "todo-t", [0, -14, -28, 14]);
+      }
+    }
+  }
+  for (const s of S.loops) {
+    const v = VEC[s.d] || [0.7,-1], p = port(S.pos[s.f], v);
+    gl.appendChild(el("circle", {cx:p[0] + v[0]*7, cy:p[1] + v[1]*7, r:7, class:"pass"}));
+  }
+  for (const a in S.boxes) {
+    const b = S.boxes[a];
+    svg.appendChild(el("rect", {x:b.gx*CW - BW/2 - 16, y:b.gy*CH - BH/2 - 16, rx:10, class:"area",
+      width:(b.w-1)*CW + BW + 32, height:(b.h-1)*CH + BH + 32}));
+  }
+  svg.appendChild(gl);
+
+  const here = S.last ? S.last.t : run.start;
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const r in S.pos) {
+    const c = centre(S.pos[r]);
+    x0 = Math.min(x0, c[0]); y0 = Math.min(y0, c[1]); x1 = Math.max(x1, c[0]); y1 = Math.max(y1, c[1]);
+    const g = el("g", {class:"room" + (S.tangle.has(r) ? " maze" : "") + (S.moved.has(r) ? " moved" : "") + (r === here ? " here" : "")});
+    g.appendChild(el("rect", {x:c[0]-BW/2, y:c[1]-BH/2, width:BW, height:BH, rx:3}));
+    const lines = wrapLabel(S.labels[r]);
+    lines.forEach((ln, i) => g.appendChild(el("text", {x:c[0], y:c[1] + 4 + (i - (lines.length-1)/2)*12}, ln)));
+    svg.appendChild(g);
+  }
+  svg.appendChild(gt);
+  const pad = 70, w = x1-x0 + BW + pad*2, h = y1-y0 + BH + pad*2, z = $("zoom").value/100;
+  svg.setAttribute("viewBox", `${x0-BW/2-pad} ${y0-BH/2-pad} ${w} ${h}`);
+  svg.setAttribute("width", w*z); svg.setAttribute("height", h*z);
+
+  const nRooms = Object.keys(S.pos).length;
+  $("stats").textContent = `Move ${k} of ${run.steps.length} · ${nRooms} rooms in ${S.nAreas} areas · ${nStraight} compass lines drawn straight, ${nBent} bent, ${nCut} cut into labels · ${nTodo} unexplored exits · ${nOver} labels overlapping something`;
+  const s = S.last;
+  $("what").textContent = !s ? "Start: " + S.labels[run.start]
+    : (s.d === "JUMP" ? `Arrived in ${S.labels[s.t]} by other means (vehicle, teleport, story event)`
+       : s.d === "INSIDE" ? `Moving inside ${S.labels[s.t]}: see its own view`
+       : `${S.labels[s.f]} → ${s.d.toLowerCase()} → ${S.labels[s.t]}`) + (s.n ? " (new room)" : "")
+      + (S.moved.size ? ` — app moved ${S.moved.size} room${S.moved.size > 1 ? "s" : ""}` : "");
+}
+
+function setRun(i) {
+  run = D.runs[i];
+  maze = new Set(run.maze);
+  $("step").max = run.steps.length; $("step").value = run.steps.length;
+  draw(run.steps.length);
+}
+D.runs.forEach((r, i) => $("run").appendChild(new Option(r.name, i)));
+$("run").onchange = e => setRun(+e.target.value);
+$("step").oninput = e => draw(+e.target.value);
+$("zoom").oninput = () => draw(+$("step").value);
+$("cut").onchange = () => draw(+$("step").value);
+const nudge = n => { const s = $("step"); s.value = Math.max(0, Math.min(+s.max, +s.value + n)); draw(+s.value); };
+$("prev").onclick = () => nudge(-1);
+$("next").onclick = () => nudge(1);
+$("play").onclick = () => {
+  if (timer) { clearInterval(timer); timer = null; $("play").textContent = "Play"; return; }
+  if (+$("step").value >= +$("step").max) { $("step").value = 0; draw(0); }
+  $("play").textContent = "Pause";
+  timer = setInterval(() => { nudge(1); if (+$("step").value >= +$("step").max) $("play").onclick(); }, 350);
+};
+document.addEventListener("keydown", e => { if (e.key === "ArrowLeft") nudge(-1); if (e.key === "ArrowRight") nudge(1); });
+// map_view.html#3 opens straight on the fourth playthrough;
+// map_view.html#0@45 also jumps to move 45 of that playthrough
+const [hashRun, hashStep] = location.hash.slice(1).split("@");
+const first = Math.min(D.runs.length - 1, +hashRun || 0);
+$("run").value = first;
+setRun(first);
+if (hashStep) { $("step").value = Math.min(+hashStep, run.steps.length); draw(+$("step").value); }
+</script>
+</body>
+</html>

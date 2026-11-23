@@ -1,0 +1,13 @@
+app/build/
+build/
+.gradle/
+.kotlin/
+.idea/
+*.iml
+local.properties
+research/__pycache__/
+# Published map scans used only for comparison: other people's copyright, not ours to redistribute
+research/reference/
+# Generated pages (rebuild with research/render.py, stack_view.py, maze_view.py)
+research/*.html
+!research/map_view.template.html

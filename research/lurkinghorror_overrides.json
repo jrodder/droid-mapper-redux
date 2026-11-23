@@ -1,0 +1,18 @@
+{
+ "_comment": "Exits the game computes in code, resolved by reading the routines (RATS-EXIT, WAXER-EXIT, CS-ELEVATOR-ENTER) and the source comments beside each exit. Great Dome up to Top of Dome is the rope climb shown dashed on Infocom's map.",
+ "TUNNEL-WEST": {"WEST": {"kind": "cond", "to": "TUNNEL-ENTRANCE"}},
+ "TUNNEL": {"WEST": {"kind": "cond", "to": "TUNNEL-WEST"}},
+ "TUNNEL-EAST": {"WEST": {"kind": "cond", "to": "TUNNEL"}},
+ "STEAM-TUNNEL": {"WEST": {"kind": "cond", "to": "TUNNEL-EAST"}},
+ "STEAM-TUNNEL-EAST": {"WEST": {"kind": "cond", "to": "STEAM-TUNNEL"}},
+ "INF-1": {"EAST": {"kind": "cond", "to": "INF-2"}},
+ "INF-2": {"EAST": {"kind": "cond", "to": "INF-3"}},
+ "INF-3": {"EAST": {"kind": "cond", "to": "INF-4"}},
+ "INF-4": {"EAST": {"kind": "cond", "to": "INF-5"}},
+ "INF-5": {"NORTH": {"kind": "cond", "to": "NUTRITION-BLDG"}, "SOUTH": {"kind": "cond", "to": "CHEMISTRY-BLDG"}},
+ "COMP-CENTER": {"SOUTH": {"kind": "cond", "to": "CS-ELEVATOR-ROOM"}, "IN": {"kind": "cond", "to": "CS-ELEVATOR-ROOM"}},
+ "CS-2ND": {"SOUTH": {"kind": "cond", "to": "CS-ELEVATOR-ROOM"}, "IN": {"kind": "cond", "to": "CS-ELEVATOR-ROOM"}},
+ "CS-3RD": {"SOUTH": {"kind": "cond", "to": "CS-ELEVATOR-ROOM"}, "IN": {"kind": "cond", "to": "CS-ELEVATOR-ROOM"}},
+ "GREAT-DOME": {"UP": {"kind": "cond", "to": "TOP-OF-DOME"}},
+ "TOP-OF-DOME": {"DOWN": {"kind": "cond", "to": "GREAT-DOME"}}
+}

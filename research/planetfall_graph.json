@@ -1,0 +1,1771 @@
+{
+ "start": "DECK-NINE",
+ "rooms": {
+  "UNDERWATER": {
+   "desc": "Underwater",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "UNDERWATER"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "UNDERWATER"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "UNDERWATER"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "CRAG"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "UNDERWATER"
+    }
+   }
+  },
+  "CRAG": {
+   "desc": "Crag",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "UP": {
+     "kind": "to",
+     "to": "BALCONY"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "UNDERWATER"
+    }
+   }
+  },
+  "BALCONY": {
+   "desc": "Balcony",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "UP": {
+     "kind": "to",
+     "to": "WINDING-STAIR"
+    }
+   }
+  },
+  "WINDING-STAIR": {
+   "desc": "Winding Stair",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "UP": {
+     "kind": "to",
+     "to": "COURTYARD"
+    }
+   }
+  },
+  "COURTYARD": {
+   "desc": "Courtyard",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "WINDING-STAIR"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "WEST-WING"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "WINDING-STAIR"
+    }
+   }
+  },
+  "WEST-WING": {
+   "desc": "West Wing",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "COURTYARD"
+    },
+    "DOWN": {
+     "kind": "blocked"
+    }
+   }
+  },
+  "PLAIN-HALL": {
+   "desc": "Plain Hall",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "REC-AREA"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "COURTYARD"
+    },
+    "NE": {
+     "kind": "to",
+     "to": "REC-CORRIDOR"
+    }
+   }
+  },
+  "REC-AREA": {
+   "desc": "Rec Area",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "cond",
+     "to": "CONFERENCE-ROOM"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "PLAIN-HALL"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "REC-CORRIDOR"
+    }
+   }
+  },
+  "CONFERENCE-ROOM": {
+   "desc": "Conference Room",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "BOOTH-1"
+    },
+    "SOUTH": {
+     "kind": "cond",
+     "to": "REC-AREA"
+    },
+    "IN": {
+     "kind": "to",
+     "to": "BOOTH-1"
+    },
+    "OUT": {
+     "kind": "cond",
+     "to": "REC-AREA"
+    }
+   }
+  },
+  "BOOTH-1": {
+   "desc": "Booth 1",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "CONFERENCE-ROOM"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "CONFERENCE-ROOM"
+    }
+   }
+  },
+  "REC-CORRIDOR": {
+   "desc": "Rec Corridor",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "DORM-B"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "DORM-A"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "MESS-CORRIDOR"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "REC-AREA"
+    },
+    "SW": {
+     "kind": "to",
+     "to": "PLAIN-HALL"
+    }
+   }
+  },
+  "DORM-A": {
+   "desc": "Dorm A",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "REC-CORRIDOR"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "SANFAC-A"
+    }
+   }
+  },
+  "SANFAC-A": {
+   "desc": "SanFac A",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "DORM-A"
+    }
+   }
+  },
+  "DORM-B": {
+   "desc": "Dorm B",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "SANFAC-B"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "REC-CORRIDOR"
+    }
+   }
+  },
+  "SANFAC-B": {
+   "desc": "SanFac B",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "DORM-B"
+    }
+   }
+  },
+  "DORM-C": {
+   "desc": "Dorm C",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "DORM-CORRIDOR"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "SANFAC-C"
+    }
+   }
+  },
+  "SANFAC-C": {
+   "desc": "SanFac C",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "DORM-C"
+    }
+   }
+  },
+  "DORM-D": {
+   "desc": "Dorm D",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "SANFAC-D"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "DORM-CORRIDOR"
+    }
+   }
+  },
+  "SANFAC-D": {
+   "desc": "SanFac D",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "DORM-D"
+    }
+   }
+  },
+  "MESS-CORRIDOR": {
+   "desc": "Mess Corridor",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "cond",
+     "to": "STORAGE-WEST"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "MESS-HALL"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "DORM-CORRIDOR"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "REC-CORRIDOR"
+    }
+   }
+  },
+  "STORAGE-WEST": {
+   "desc": "Storage West",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "cond",
+     "to": "MESS-CORRIDOR"
+    },
+    "OUT": {
+     "kind": "cond",
+     "to": "MESS-CORRIDOR"
+    }
+   }
+  },
+  "DORM-CORRIDOR": {
+   "desc": "Dorm Corridor",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "DORM-D"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "DORM-C"
+    },
+    "EAST": {
+     "kind": "cond",
+     "to": "CORRIDOR-JUNCTION"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MESS-CORRIDOR"
+    }
+   }
+  },
+  "MESS-HALL": {
+   "desc": "Mess Hall",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "MESS-CORRIDOR"
+    },
+    "SOUTH": {
+     "kind": "cond",
+     "to": "KITCHEN"
+    },
+    "IN": {
+     "kind": "cond",
+     "to": "KITCHEN"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "MESS-CORRIDOR"
+    }
+   }
+  },
+  "KITCHEN": {
+   "desc": "Kitchen",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "MESS-HALL"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "MESS-HALL"
+    }
+   }
+  },
+  "CORRIDOR-JUNCTION": {
+   "desc": "Corridor Junction",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "ADMIN-CORRIDOR-S"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "MECH-CORRIDOR-N"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "ELEVATOR-LOBBY"
+    },
+    "WEST": {
+     "kind": "cond",
+     "to": "DORM-CORRIDOR"
+    }
+   }
+  },
+  "ADMIN-CORRIDOR-S": {
+   "desc": "Admin Corridor South",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "ADMIN-CORRIDOR"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "CORRIDOR-JUNCTION"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "SANFAC-E"
+    }
+   }
+  },
+  "ADMIN-CORRIDOR": {
+   "desc": "Admin Corridor",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "cond",
+     "to": "ADMIN-CORRIDOR-N"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "ADMIN-CORRIDOR-S"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "SYSTEMS-MONITORS"
+    }
+   }
+  },
+  "ADMIN-CORRIDOR-N": {
+   "desc": "Admin Corridor North",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "TRANSPORTATION-SUPPLY"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "ADMIN-CORRIDOR"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "PLAN-ROOM"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "SMALL-OFFICE"
+    }
+   }
+  },
+  "SANFAC-E": {
+   "desc": "SanFac E",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "ADMIN-CORRIDOR-S"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "ADMIN-CORRIDOR-S"
+    }
+   }
+  },
+  "SYSTEMS-MONITORS": {
+   "desc": "Systems Monitors",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "ADMIN-CORRIDOR"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "ADMIN-CORRIDOR"
+    }
+   }
+  },
+  "PLAN-ROOM": {
+   "desc": "Plan Room",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "ADMIN-CORRIDOR-N"
+    }
+   }
+  },
+  "TRANSPORTATION-SUPPLY": {
+   "desc": "Transportation Supply",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "TRANSPORTATION-SUPPLY"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "ADMIN-CORRIDOR-N"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "TRANSPORTATION-SUPPLY"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "TRANSPORTATION-SUPPLY"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "ADMIN-CORRIDOR-N"
+    }
+   }
+  },
+  "SMALL-OFFICE": {
+   "desc": "Small Office",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "ADMIN-CORRIDOR-N"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "LARGE-OFFICE"
+    }
+   }
+  },
+  "LARGE-OFFICE": {
+   "desc": "Large Office",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "SMALL-OFFICE"
+    }
+   }
+  },
+  "MECH-CORRIDOR-N": {
+   "desc": "Mech Corridor North",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "CORRIDOR-JUNCTION"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "MECH-CORRIDOR"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "STORAGE-EAST"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "PHYSICAL-PLANT"
+    }
+   }
+  },
+  "MECH-CORRIDOR": {
+   "desc": "Mech Corridor",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "MECH-CORRIDOR-N"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "MECH-CORRIDOR-S"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "REACTOR-CONTROL"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "PHYSICAL-PLANT"
+    }
+   }
+  },
+  "MECH-CORRIDOR-S": {
+   "desc": "Mech Corridor South",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "MECH-CORRIDOR"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "MACHINE-SHOP"
+    },
+    "SE": {
+     "kind": "to",
+     "to": "ROBOT-SHOP"
+    },
+    "SW": {
+     "kind": "to",
+     "to": "TOOL-ROOM"
+    }
+   }
+  },
+  "STORAGE-EAST": {
+   "desc": "Storage East",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "MECH-CORRIDOR-N"
+    }
+   }
+  },
+  "PHYSICAL-PLANT": {
+   "desc": "Physical Plant",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NE": {
+     "kind": "to",
+     "to": "MECH-CORRIDOR-N"
+    },
+    "SE": {
+     "kind": "to",
+     "to": "MECH-CORRIDOR"
+    }
+   }
+  },
+  "REACTOR-CONTROL": {
+   "desc": "Reactor Control",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "cond",
+     "to": "REACTOR-ELEVATOR"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MECH-CORRIDOR"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "REACTOR-ACCESS-STAIRS"
+    },
+    "IN": {
+     "kind": "cond",
+     "to": "REACTOR-ELEVATOR"
+    }
+   }
+  },
+  "REACTOR-ACCESS-STAIRS": {
+   "desc": "Reactor Access Stairs",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "UP": {
+     "kind": "to",
+     "to": "REACTOR-CONTROL"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "REACTOR-ACCESS-STAIRS"
+    }
+   }
+  },
+  "REACTOR-ELEVATOR": {
+   "desc": "Reactor Elevator",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "REACTOR-CONTROL"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "REACTOR-CONTROL"
+    }
+   }
+  },
+  "TOOL-ROOM": {
+   "desc": "Tool Room",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "MACHINE-SHOP"
+    },
+    "NE": {
+     "kind": "to",
+     "to": "MECH-CORRIDOR-S"
+    }
+   }
+  },
+  "MACHINE-SHOP": {
+   "desc": "Machine Shop",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "MECH-CORRIDOR-S"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "ROBOT-SHOP"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "TOOL-ROOM"
+    }
+   }
+  },
+  "ROBOT-SHOP": {
+   "desc": "Robot Shop",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "MACHINE-SHOP"
+    },
+    "NW": {
+     "kind": "to",
+     "to": "MECH-CORRIDOR-S"
+    }
+   }
+  },
+  "ELEVATOR-LOBBY": {
+   "desc": "Elevator Lobby",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "BOOTH-2"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "CORRIDOR-JUNCTION"
+    },
+    "IN": {
+     "kind": "to",
+     "to": "BOOTH-2"
+    }
+   }
+  },
+  "UPPER-ELEVATOR": {
+   "desc": "Upper Elevator",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "UP": {
+     "kind": "blocked"
+    },
+    "DOWN": {
+     "kind": "blocked"
+    }
+   }
+  },
+  "LOWER-ELEVATOR": {
+   "desc": "Lower Elevator",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "UP": {
+     "kind": "blocked"
+    },
+    "DOWN": {
+     "kind": "blocked"
+    }
+   }
+  },
+  "BOOTH-2": {
+   "desc": "Booth 2",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "ELEVATOR-LOBBY"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "ELEVATOR-LOBBY"
+    }
+   }
+  },
+  "TOWER-CORE": {
+   "desc": "Tower Core",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "UPPER-ELEVATOR"
+    },
+    "NE": {
+     "kind": "to",
+     "to": "COMM-ROOM"
+    },
+    "SW": {
+     "kind": "to",
+     "to": "OBSERVATION-DECK"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "HELIPAD"
+    }
+   }
+  },
+  "HELIPAD": {
+   "desc": "Helipad",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "blocked"
+    },
+    "SOUTH": {
+     "kind": "blocked"
+    },
+    "EAST": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "blocked"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "TOWER-CORE"
+    },
+    "IN": {
+     "kind": "to",
+     "to": "HELICOPTER"
+    }
+   }
+  },
+  "HELICOPTER": {
+   "desc": "Helicopter",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "OUT": {
+     "kind": "to",
+     "to": "HELIPAD"
+    }
+   }
+  },
+  "COMM-ROOM": {
+   "desc": "Comm Room",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SW": {
+     "kind": "to",
+     "to": "TOWER-CORE"
+    }
+   }
+  },
+  "OBSERVATION-DECK": {
+   "desc": "Observation Deck",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NE": {
+     "kind": "to",
+     "to": "TOWER-CORE"
+    }
+   }
+  },
+  "WAITING-AREA": {
+   "desc": "Waiting Area",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "cond",
+     "to": "LOWER-ELEVATOR"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "KALAMONTEE-PLATFORM"
+    },
+    "IN": {
+     "kind": "cond",
+     "to": "LOWER-ELEVATOR"
+    }
+   }
+  },
+  "KALAMONTEE-PLATFORM": {
+   "desc": "Kalamontee Platform",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "WAITING-AREA"
+    }
+   }
+  },
+  "LAWANDA-PLATFORM": {
+   "desc": "Lawanda Platform",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "ESCALATOR"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "ESCALATOR"
+    }
+   }
+  },
+  "ESCALATOR": {
+   "desc": "Escalator",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "FORK"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "LAWANDA-PLATFORM"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "FORK"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "LAWANDA-PLATFORM"
+    }
+   }
+  },
+  "FORK": {
+   "desc": "Fork",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "ESCALATOR"
+    },
+    "NE": {
+     "kind": "to",
+     "to": "SYSTEMS-CORRIDOR-WEST"
+    },
+    "SE": {
+     "kind": "to",
+     "to": "PROJECT-CORRIDOR-WEST"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "ESCALATOR"
+    }
+   }
+  },
+  "INFIRMARY": {
+   "desc": "Infirmary",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SE": {
+     "kind": "to",
+     "to": "SYSTEMS-CORRIDOR-WEST"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "SYSTEMS-CORRIDOR-WEST"
+    }
+   }
+  },
+  "REPAIR-ROOM": {
+   "desc": "Repair Room",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "blocked"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "SYSTEMS-CORRIDOR-WEST"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "SYSTEMS-CORRIDOR-WEST"
+    }
+   }
+  },
+  "SYSTEMS-CORRIDOR-WEST": {
+   "desc": "Systems Corridor West",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "REPAIR-ROOM"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "SYSTEMS-CORRIDOR"
+    },
+    "NW": {
+     "kind": "to",
+     "to": "INFIRMARY"
+    },
+    "SW": {
+     "kind": "to",
+     "to": "FORK"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "REPAIR-ROOM"
+    }
+   }
+  },
+  "SYSTEMS-CORRIDOR": {
+   "desc": "Systems Corridor",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "PLANETARY-DEFENSE"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "SYSTEMS-CORRIDOR-EAST"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "SYSTEMS-CORRIDOR-WEST"
+    }
+   }
+  },
+  "SYSTEMS-CORRIDOR-EAST": {
+   "desc": "Systems Corridor East",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "PLANETARY-COURSE-CONTROL"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "LIBRARY-LOBBY"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "PHYSICAL-PLANT-TWO"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "SYSTEMS-CORRIDOR"
+    }
+   }
+  },
+  "PHYSICAL-PLANT-TWO": {
+   "desc": "Physical Plant",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "SYSTEMS-CORRIDOR-EAST"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "SYSTEMS-CORRIDOR-EAST"
+    }
+   }
+  },
+  "PLANETARY-DEFENSE": {
+   "desc": "Planetary Defense",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "SYSTEMS-CORRIDOR"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "SYSTEMS-CORRIDOR"
+    }
+   }
+  },
+  "PLANETARY-COURSE-CONTROL": {
+   "desc": "Course Control",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "SYSTEMS-CORRIDOR-EAST"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "SYSTEMS-CORRIDOR-EAST"
+    }
+   }
+  },
+  "LIBRARY-LOBBY": {
+   "desc": "Library Lobby",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "SYSTEMS-CORRIDOR-EAST"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "PROJECT-CORRIDOR-EAST"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "BOOTH-3"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "LIBRARY"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "LIBRARY"
+    },
+    "IN": {
+     "kind": "to",
+     "to": "BOOTH-3"
+    }
+   }
+  },
+  "BOOTH-3": {
+   "desc": "Booth 3",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "LIBRARY-LOBBY"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "LIBRARY-LOBBY"
+    }
+   }
+  },
+  "LIBRARY": {
+   "desc": "Library",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "LIBRARY-LOBBY"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "LIBRARY-LOBBY"
+    }
+   }
+  },
+  "PROJECT-CORRIDOR-WEST": {
+   "desc": "Project Corridor West",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "PROJECT-CORRIDOR"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "SANFAC-F"
+    },
+    "NW": {
+     "kind": "to",
+     "to": "FORK"
+    }
+   }
+  },
+  "SANFAC-F": {
+   "desc": "SanFac F",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "PROJECT-CORRIDOR-WEST"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "PROJECT-CORRIDOR-WEST"
+    }
+   }
+  },
+  "PROJECT-CORRIDOR": {
+   "desc": "Project Corridor",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "PROJCON-OFFICE"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "PROJECT-CORRIDOR-EAST"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "PROJECT-CORRIDOR-WEST"
+    }
+   }
+  },
+  "PROJCON-OFFICE": {
+   "desc": "ProjCon Office",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "PROJECT-CORRIDOR"
+    },
+    "SOUTH": {
+     "kind": "cond",
+     "to": "CRYO-ELEVATOR"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "COMPUTER-ROOM"
+    }
+   }
+  },
+  "CRYO-ELEVATOR": {
+   "desc": "Cryo-Elevator",
+   "dark": false,
+   "maze": false,
+   "exits": {}
+  },
+  "CRYO-ANTEROOM": {
+   "desc": "Cryo-Anteroom",
+   "dark": false,
+   "maze": false,
+   "exits": {}
+  },
+  "PROJECT-CORRIDOR-EAST": {
+   "desc": "Project Corridor East",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "LIBRARY-LOBBY"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "COMPUTER-ROOM"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "MAIN-LAB"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "PROJECT-CORRIDOR"
+    }
+   }
+  },
+  "COMPUTER-ROOM": {
+   "desc": "Computer Room",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "PROJECT-CORRIDOR-EAST"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "MINI-BOOTH"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "PROJCON-OFFICE"
+    },
+    "NE": {
+     "kind": "to",
+     "to": "MAIN-LAB"
+    },
+    "IN": {
+     "kind": "to",
+     "to": "MINI-BOOTH"
+    }
+   }
+  },
+  "MINI-BOOTH": {
+   "desc": "Miniaturization Booth",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "COMPUTER-ROOM"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "COMPUTER-ROOM"
+    }
+   }
+  },
+  "MAIN-LAB": {
+   "desc": "Main Lab",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "LAB-STORAGE"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "PROJECT-CORRIDOR-EAST"
+    },
+    "NE": {
+     "kind": "cond",
+     "to": "RADIATION-LOCK-WEST"
+    },
+    "SE": {
+     "kind": "cond",
+     "to": "BIO-LOCK-WEST"
+    },
+    "SW": {
+     "kind": "to",
+     "to": "COMPUTER-ROOM"
+    }
+   }
+  },
+  "LAB-STORAGE": {
+   "desc": "Lab Storage",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "MAIN-LAB"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "MAIN-LAB"
+    }
+   }
+  },
+  "BIO-LOCK-WEST": {
+   "desc": "Bio Lock West",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "BIO-LOCK-EAST"
+    },
+    "WEST": {
+     "kind": "cond",
+     "to": "MAIN-LAB"
+    }
+   }
+  },
+  "BIO-LOCK-EAST": {
+   "desc": "Bio Lock East",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "cond",
+     "to": "BIO-LAB"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "BIO-LOCK-WEST"
+    }
+   }
+  },
+  "RADIATION-LOCK-WEST": {
+   "desc": "Radiation Lock West",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "RADIATION-LOCK-EAST"
+    },
+    "WEST": {
+     "kind": "cond",
+     "to": "MAIN-LAB"
+    }
+   }
+  },
+  "RADIATION-LOCK-EAST": {
+   "desc": "Radiation Lock East",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "cond",
+     "to": "RADIATION-LAB"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "RADIATION-LOCK-WEST"
+    }
+   }
+  },
+  "BIO-LAB": {
+   "desc": "Bio Lab",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "cond",
+     "to": "LAB-OFFICE"
+    },
+    "WEST": {
+     "kind": "cond",
+     "to": "BIO-LOCK-EAST"
+    }
+   }
+  },
+  "RADIATION-LAB": {
+   "desc": "Radiation Lab",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "cond",
+     "to": "RADIATION-LOCK-EAST"
+    }
+   }
+  },
+  "LAB-OFFICE": {
+   "desc": "Lab Office",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "AUXILIARY-BOOTH"
+    },
+    "WEST": {
+     "kind": "cond",
+     "to": "BIO-LAB"
+    },
+    "IN": {
+     "kind": "to",
+     "to": "AUXILIARY-BOOTH"
+    }
+   }
+  },
+  "AUXILIARY-BOOTH": {
+   "desc": "Auxiliary Booth",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "LAB-OFFICE"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "LAB-OFFICE"
+    }
+   }
+  },
+  "STATION-384": {
+   "desc": "Station 384",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "STRIP-NEAR-STATION"
+    }
+   }
+  },
+  "STRIP-NEAR-STATION": {
+   "desc": "Strip Near Station",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "MIDDLE-OF-STRIP"
+    },
+    "SOUTH": {
+     "kind": "blocked"
+    },
+    "EAST": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "STATION-384"
+    }
+   }
+  },
+  "MIDDLE-OF-STRIP": {
+   "desc": "Middle of Strip",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "STRIP-NEAR-RELAY"
+    },
+    "SOUTH": {
+     "kind": "cond",
+     "to": "STRIP-NEAR-STATION"
+    },
+    "EAST": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "blocked"
+    }
+   }
+  },
+  "STRIP-NEAR-RELAY": {
+   "desc": "Strip Near Relay",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "blocked"
+    },
+    "SOUTH": {
+     "kind": "cond",
+     "to": "MIDDLE-OF-STRIP"
+    },
+    "WEST": {
+     "kind": "blocked"
+    }
+   }
+  },
+  "BRIG": {
+   "desc": "Brig",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "blocked"
+    }
+   }
+  },
+  "DECK-NINE": {
+   "desc": "Deck Nine",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "cond",
+     "to": "REACTOR-LOBBY"
+    },
+    "WEST": {
+     "kind": "cond",
+     "to": "ESCAPE-POD"
+    },
+    "UP": {
+     "kind": "cond",
+     "to": "GANGWAY"
+    },
+    "IN": {
+     "kind": "cond",
+     "to": "ESCAPE-POD"
+    }
+   }
+  },
+  "REACTOR-LOBBY": {
+   "desc": "Reactor Lobby",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "blocked"
+    },
+    "EAST": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "cond",
+     "to": "DECK-NINE"
+    }
+   }
+  },
+  "GANGWAY": {
+   "desc": "Gangway",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "UP": {
+     "kind": "to",
+     "to": "DECK-EIGHT"
+    },
+    "DOWN": {
+     "kind": "cond",
+     "to": "DECK-NINE"
+    }
+   }
+  },
+  "DECK-EIGHT": {
+   "desc": "Deck Eight",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "blocked"
+    },
+    "EAST": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "blocked"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "GANGWAY"
+    }
+   }
+  },
+  "ESCAPE-POD": {
+   "desc": "Escape Pod",
+   "dark": false,
+   "maze": false,
+   "exits": {}
+  },
+  "SHUTTLE-CAR-ALFIE": {
+   "desc": "Shuttle Car Alfie",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "ALFIE-CONTROL-EAST"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "ALFIE-CONTROL-WEST"
+    }
+   }
+  },
+  "ALFIE-CONTROL-EAST": {
+   "desc": "Alfie Control East",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "cond",
+     "to": "SHUTTLE-CAR-ALFIE"
+    }
+   }
+  },
+  "ALFIE-CONTROL-WEST": {
+   "desc": "Alfie Control West",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "cond",
+     "to": "SHUTTLE-CAR-ALFIE"
+    }
+   }
+  },
+  "SHUTTLE-CAR-BETTY": {
+   "desc": "Shuttle Car Betty",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "BETTY-CONTROL-EAST"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "BETTY-CONTROL-WEST"
+    }
+   }
+  },
+  "BETTY-CONTROL-EAST": {
+   "desc": "Betty Control East",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "cond",
+     "to": "SHUTTLE-CAR-BETTY"
+    }
+   }
+  },
+  "BETTY-CONTROL-WEST": {
+   "desc": "Betty Control West",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "cond",
+     "to": "SHUTTLE-CAR-BETTY"
+    }
+   }
+  }
+ }
+}

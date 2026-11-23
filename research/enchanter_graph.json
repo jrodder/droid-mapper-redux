@@ -1,0 +1,1284 @@
+{
+ "start": "WEST-FORK",
+ "rooms": {
+  "INSIDE-GATE": {
+   "desc": "Inside Gate",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "PEBBLED-PATH"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "WEST-HALL"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "COURTYARD-1"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "WEST-CASTLE"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "WEST-CASTLE"
+    }
+   }
+  },
+  "PEBBLED-PATH": {
+   "desc": "Pebbled Path",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "NW-TOWER"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "INSIDE-GATE"
+    }
+   }
+  },
+  "COURTYARD-1": {
+   "desc": "Courtyard",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "KNOT-ROOM"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "COURTYARD-3"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "INSIDE-GATE"
+    },
+    "NE": {
+     "kind": "to",
+     "to": "COURTYARD-2"
+    },
+    "SE": {
+     "kind": "to",
+     "to": "COURTYARD-4"
+    }
+   }
+  },
+  "WEST-HALL": {
+   "desc": "West Hall",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "INSIDE-GATE"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "SW-TOWER"
+    }
+   }
+  },
+  "SW-TOWER": {
+   "desc": "Tower",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "WEST-HALL"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "DIM-DESCENT"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "BEDROOM"
+    }
+   }
+  },
+  "BEDROOM": {
+   "desc": "Bedroom",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "DOWN": {
+     "kind": "to",
+     "to": "SW-TOWER"
+    }
+   }
+  },
+  "DIM-DESCENT": {
+   "desc": "South Hall",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "KNOT-ROOM"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "DUNGEON"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "GALLERY"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "SW-TOWER"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "DUNGEON"
+    }
+   }
+  },
+  "DUNGEON": {
+   "desc": "Dungeon",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "cond",
+     "to": "NORTH-CELL"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "DIM-DESCENT"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "T-A"
+    },
+    "IN": {
+     "kind": "cond",
+     "to": "NORTH-CELL"
+    }
+   }
+  },
+  "NORTH-CELL": {
+   "desc": "Cell",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "cond",
+     "to": "DUNGEON"
+    },
+    "EAST": {
+     "kind": "cond",
+     "to": "SECRET-PASSAGE"
+    },
+    "OUT": {
+     "kind": "cond",
+     "to": "DUNGEON"
+    }
+   }
+  },
+  "SECRET-PASSAGE": {
+   "desc": "Secret Passage",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "cond",
+     "to": "NORTH-CELL"
+    },
+    "UP": {
+     "kind": "blocked"
+    }
+   }
+  },
+  "SOUTH-GATE": {
+   "desc": "South Gate",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "EAST-HALL"
+    },
+    "SOUTH": {
+     "kind": "cond",
+     "to": "MEADOW"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "SE-TOWER"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "GALLERY"
+    }
+   }
+  },
+  "EAST-HALL": {
+   "desc": "East Hall",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "BANQUET-HALL"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "SOUTH-GATE"
+    }
+   }
+  },
+  "SE-TOWER": {
+   "desc": "Tower",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "SOUTH-GATE"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "ENGINE-ROOM"
+    }
+   }
+  },
+  "BANQUET-HALL": {
+   "desc": "Banquet Hall",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "JUNCTION"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "EAST-HALL"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "KITCHEN"
+    }
+   }
+  },
+  "KITCHEN": {
+   "desc": "Kitchen",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "BANQUET-HALL"
+    }
+   }
+  },
+  "JUNCTION": {
+   "desc": "Junction",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "LIBRARY"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "BANQUET-HALL"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "LANDING"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "COURTYARD-7"
+    }
+   }
+  },
+  "LIBRARY": {
+   "desc": "Library",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "NORTH-GATE"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "JUNCTION"
+    }
+   }
+  },
+  "NORTH-GATE": {
+   "desc": "North Gate",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "cond",
+     "to": "FOREST-1"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "LIBRARY"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "PURLOINED-ROOM"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MIRROR-HALL-4"
+    }
+   }
+  },
+  "FOREST-1": {
+   "desc": "Forest",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "blocked"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "NORTH-GATE"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "FOREST-2"
+    },
+    "WEST": {
+     "kind": "blocked"
+    },
+    "NE": {
+     "kind": "blocked"
+    },
+    "NW": {
+     "kind": "blocked"
+    },
+    "SE": {
+     "kind": "blocked"
+    },
+    "SW": {
+     "kind": "blocked"
+    }
+   }
+  },
+  "FOREST-2": {
+   "desc": "Swamp",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "blocked"
+    },
+    "SOUTH": {
+     "kind": "blocked"
+    },
+    "EAST": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "FOREST-1"
+    },
+    "NE": {
+     "kind": "blocked"
+    },
+    "NW": {
+     "kind": "blocked"
+    },
+    "SE": {
+     "kind": "blocked"
+    },
+    "SW": {
+     "kind": "blocked"
+    }
+   }
+  },
+  "NW-TOWER": {
+   "desc": "Tower",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "PEBBLED-PATH"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "MIRROR-HALL-1"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "JEWEL-ROOM"
+    }
+   }
+  },
+  "COURTYARD-2": {
+   "desc": "Courtyard",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "COURTYARD-3"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "COURTYARD-5"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "COURTYARD-1"
+    },
+    "SE": {
+     "kind": "to",
+     "to": "TEMPLE"
+    },
+    "SW": {
+     "kind": "to",
+     "to": "COURTYARD-1"
+    }
+   }
+  },
+  "COURTYARD-3": {
+   "desc": "Courtyard",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "COURTYARD-2"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "COURTYARD-4"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "TEMPLE"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "COURTYARD-1"
+    },
+    "NE": {
+     "kind": "to",
+     "to": "COURTYARD-5"
+    },
+    "SE": {
+     "kind": "to",
+     "to": "COURTYARD-6"
+    }
+   }
+  },
+  "COURTYARD-4": {
+   "desc": "Courtyard",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "COURTYARD-3"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "COURTYARD-6"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "COURTYARD-1"
+    },
+    "NE": {
+     "kind": "to",
+     "to": "TEMPLE"
+    },
+    "NW": {
+     "kind": "to",
+     "to": "COURTYARD-1"
+    }
+   }
+  },
+  "COURTYARD-5": {
+   "desc": "Courtyard",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "COURTYARD-2"
+    },
+    "SE": {
+     "kind": "to",
+     "to": "COURTYARD-7"
+    },
+    "SW": {
+     "kind": "to",
+     "to": "COURTYARD-3"
+    }
+   }
+  },
+  "COURTYARD-6": {
+   "desc": "Courtyard",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "COURTYARD-4"
+    },
+    "NE": {
+     "kind": "to",
+     "to": "COURTYARD-7"
+    },
+    "NW": {
+     "kind": "to",
+     "to": "COURTYARD-3"
+    }
+   }
+  },
+  "COURTYARD-7": {
+   "desc": "Courtyard",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "JUNCTION"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "TEMPLE"
+    },
+    "NW": {
+     "kind": "to",
+     "to": "COURTYARD-5"
+    },
+    "SW": {
+     "kind": "to",
+     "to": "COURTYARD-6"
+    }
+   }
+  },
+  "JEWEL-ROOM": {
+   "desc": "Jewel Room",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "DOWN": {
+     "kind": "to",
+     "to": "NW-TOWER"
+    }
+   }
+  },
+  "GALLERY": {
+   "desc": "Gallery",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "SOUTH-GATE"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "DIM-DESCENT"
+    }
+   }
+  },
+  "ENGINE-ROOM": {
+   "desc": "Engine Room",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SE": {
+     "kind": "cond",
+     "to": "CLOSET"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "SE-TOWER"
+    }
+   }
+  },
+  "CLOSET": {
+   "desc": "Control Room",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NW": {
+     "kind": "cond",
+     "to": "ENGINE-ROOM"
+    }
+   }
+  },
+  "MEADOW": {
+   "desc": "Meadow",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "cond",
+     "to": "SOUTH-GATE"
+    },
+    "SOUTH": {
+     "kind": "blocked"
+    },
+    "EAST": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "blocked"
+    },
+    "NE": {
+     "kind": "blocked"
+    },
+    "NW": {
+     "kind": "blocked"
+    },
+    "SE": {
+     "kind": "to",
+     "to": "BEACH"
+    },
+    "SW": {
+     "kind": "blocked"
+    }
+   }
+  },
+  "BEACH": {
+   "desc": "Beach",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NW": {
+     "kind": "to",
+     "to": "MEADOW"
+    }
+   }
+  },
+  "KNOT-ROOM": {
+   "desc": "Closet",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "COURTYARD-1"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "DIM-DESCENT"
+    }
+   }
+  },
+  "WEST-CASTLE": {
+   "desc": "Outside Gate",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "INSIDE-GATE"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "WESTERN-ROAD"
+    },
+    "IN": {
+     "kind": "to",
+     "to": "INSIDE-GATE"
+    }
+   }
+  },
+  "WESTERN-ROAD": {
+   "desc": "Western Road",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "blocked"
+    },
+    "SOUTH": {
+     "kind": "blocked"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "WEST-CASTLE"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "EAST-FORK"
+    }
+   }
+  },
+  "EAST-FORK": {
+   "desc": "Eastern Fork",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "WESTERN-ROAD"
+    },
+    "NW": {
+     "kind": "to",
+     "to": "TRAIL-HEAD"
+    },
+    "SW": {
+     "kind": "to",
+     "to": "VILLAGE-EAST"
+    }
+   }
+  },
+  "TRAIL-HEAD": {
+   "desc": "Trail Head",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NE": {
+     "kind": "to",
+     "to": "SHADY-BROOK"
+    },
+    "NW": {
+     "kind": "to",
+     "to": "SHACK-EAST"
+    },
+    "SE": {
+     "kind": "to",
+     "to": "EAST-FORK"
+    }
+   }
+  },
+  "SHADY-BROOK": {
+   "desc": "Shady Brook",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SW": {
+     "kind": "to",
+     "to": "TRAIL-HEAD"
+    }
+   }
+  },
+  "SHACK-EAST": {
+   "desc": "Trail",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SE": {
+     "kind": "to",
+     "to": "TRAIL-HEAD"
+    },
+    "SW": {
+     "kind": "to",
+     "to": "SHACK-ROOM"
+    }
+   }
+  },
+  "SHACK-ROOM": {
+   "desc": "Outside of Shack",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "SHACK"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "SHACK-EAST"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "WEST-FORK"
+    },
+    "NE": {
+     "kind": "to",
+     "to": "SHACK-EAST"
+    },
+    "SW": {
+     "kind": "to",
+     "to": "WEST-FORK"
+    },
+    "IN": {
+     "kind": "to",
+     "to": "SHACK"
+    }
+   }
+  },
+  "SHACK": {
+   "desc": "Inside Shack",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "SHACK-ROOM"
+    },
+    "OUT": {
+     "kind": "to",
+     "to": "SHACK-ROOM"
+    }
+   }
+  },
+  "WEST-FORK": {
+   "desc": "Fork",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "LONG-ROAD"
+    },
+    "NE": {
+     "kind": "to",
+     "to": "SHACK-ROOM"
+    },
+    "SE": {
+     "kind": "to",
+     "to": "DUSTY-ROAD"
+    }
+   }
+  },
+  "DUSTY-ROAD": {
+   "desc": "Dusty Trail",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NW": {
+     "kind": "to",
+     "to": "WEST-FORK"
+    },
+    "SE": {
+     "kind": "to",
+     "to": "HAIRPIN-LOOP"
+    }
+   }
+  },
+  "HAIRPIN-LOOP": {
+   "desc": "Loop",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NE": {
+     "kind": "to",
+     "to": "VILLAGE"
+    },
+    "NW": {
+     "kind": "to",
+     "to": "DUSTY-ROAD"
+    }
+   }
+  },
+  "VILLAGE": {
+   "desc": "Deserted Village",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "MOUNTAIN-TRAIL"
+    },
+    "EAST": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "blocked"
+    },
+    "NE": {
+     "kind": "to",
+     "to": "VILLAGE-EAST"
+    },
+    "NW": {
+     "kind": "blocked"
+    },
+    "SE": {
+     "kind": "blocked"
+    },
+    "SW": {
+     "kind": "to",
+     "to": "HAIRPIN-LOOP"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "MOUNTAIN-TRAIL"
+    }
+   }
+  },
+  "MOUNTAIN-TRAIL": {
+   "desc": "Mountain Trail",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "VISTA"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "VILLAGE"
+    },
+    "EAST": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "blocked"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "VISTA"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "VILLAGE"
+    }
+   }
+  },
+  "VISTA": {
+   "desc": "Lonely Mountain",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "blocked"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "MOUNTAIN-TRAIL"
+    },
+    "EAST": {
+     "kind": "blocked"
+    },
+    "WEST": {
+     "kind": "blocked"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "MOUNTAIN-TRAIL"
+    }
+   }
+  },
+  "VILLAGE-EAST": {
+   "desc": "Village Outskirts",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "blocked"
+    },
+    "SOUTH": {
+     "kind": "blocked"
+    },
+    "NE": {
+     "kind": "to",
+     "to": "EAST-FORK"
+    },
+    "SW": {
+     "kind": "to",
+     "to": "VILLAGE"
+    }
+   }
+  },
+  "LONG-ROAD": {
+   "desc": "Long Road",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "cond",
+     "to": "WEST-FORK"
+    },
+    "WEST": {
+     "kind": "cond",
+     "to": "WEST-FORK"
+    }
+   }
+  },
+  "PURLOINED-ROOM": {
+   "desc": "Guarded Door",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "cond",
+     "to": "MAP-ROOM"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "NORTH-GATE"
+    },
+    "UP": {
+     "kind": "cond",
+     "to": "MAP-ROOM"
+    }
+   }
+  },
+  "MAP-ROOM": {
+   "desc": "Map Room",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "cond",
+     "to": "PURLOINED-ROOM"
+    },
+    "DOWN": {
+     "kind": "cond",
+     "to": "PURLOINED-ROOM"
+    }
+   }
+  },
+  "MIRROR-HALL-1": {
+   "desc": "Hall of Mirrors One",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "MIRROR-HALL-2"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "NW-TOWER"
+    }
+   }
+  },
+  "MIRROR-HALL-2": {
+   "desc": "Hall of Mirrors Two",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "MIRROR-HALL-3"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MIRROR-HALL-1"
+    }
+   }
+  },
+  "MIRROR-HALL-3": {
+   "desc": "Hall of Mirrors Three",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "MIRROR-HALL-4"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MIRROR-HALL-2"
+    }
+   }
+  },
+  "MIRROR-HALL-4": {
+   "desc": "Hall of Mirrors Four",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "NORTH-GATE"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MIRROR-HALL-3"
+    }
+   }
+  },
+  "LANDING": {
+   "desc": "Landing",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "EAST": {
+     "kind": "cond",
+     "to": "ENDLESS-STAIR"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "JUNCTION"
+    }
+   }
+  },
+  "ENDLESS-STAIR": {
+   "desc": "Winding Stair",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "cond",
+     "to": "LANDING"
+    }
+   }
+  },
+  "REAL-STAIR": {
+   "desc": "Winding Stair",
+   "dark": true,
+   "maze": false,
+   "exits": {}
+  },
+  "PIT": {
+   "desc": "Bottomless Pit",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "UP": {
+     "kind": "cond",
+     "to": "REAL-STAIR"
+    },
+    "DOWN": {
+     "kind": "cond",
+     "to": "REAL-STAIR"
+    }
+   }
+  },
+  "WARLOCK-TOWER": {
+   "desc": "Warlock's Tower",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "blocked"
+    },
+    "DOWN": {
+     "kind": "blocked"
+    }
+   }
+  },
+  "TEMPLE": {
+   "desc": "Temple",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "cond",
+     "to": "TOWER-N"
+    },
+    "SOUTH": {
+     "kind": "cond",
+     "to": "TOWER-S"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "COURTYARD-7"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "COURTYARD-3"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "ALTAR"
+    }
+   }
+  },
+  "ALTAR": {
+   "desc": "Sacrificial Altar",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "DOWN": {
+     "kind": "to",
+     "to": "TEMPLE"
+    }
+   }
+  },
+  "TOWER-N": {
+   "desc": "Cell",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "SOUTH": {
+     "kind": "cond",
+     "to": "TEMPLE"
+    }
+   }
+  },
+  "TOWER-S": {
+   "desc": "Cell",
+   "dark": false,
+   "maze": false,
+   "exits": {
+    "NORTH": {
+     "kind": "cond",
+     "to": "TEMPLE"
+    }
+   }
+  },
+  "T-A": {
+   "desc": "Translucent Room",
+   "dark": true,
+   "maze": false,
+   "exits": {}
+  },
+  "T-B": {
+   "desc": "Translucent Room",
+   "dark": true,
+   "maze": false,
+   "exits": {}
+  },
+  "T-C": {
+   "desc": "Translucent Room",
+   "dark": true,
+   "maze": false,
+   "exits": {}
+  },
+  "T-D": {
+   "desc": "Translucent Room",
+   "dark": true,
+   "maze": false,
+   "exits": {}
+  },
+  "T-E": {
+   "desc": "Translucent Room",
+   "dark": true,
+   "maze": false,
+   "exits": {}
+  },
+  "T-F": {
+   "desc": "Translucent Room",
+   "dark": true,
+   "maze": false,
+   "exits": {}
+  },
+  "T-G": {
+   "desc": "Translucent Room",
+   "dark": true,
+   "maze": false,
+   "exits": {}
+  },
+  "T-H": {
+   "desc": "Translucent Room",
+   "dark": true,
+   "maze": false,
+   "exits": {}
+  },
+  "T-I": {
+   "desc": "Translucent Room",
+   "dark": true,
+   "maze": false,
+   "exits": {}
+  }
+ }
+}

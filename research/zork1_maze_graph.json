@@ -1,0 +1,415 @@
+{
+ "start": "TROLL-ROOM",
+ "rooms": {
+  "MAZE-7": {
+   "desc": "Maze",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "MAZE-15"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "MAZE-8"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MAZE-6"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "MAZE-14"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "DEAD-END-1"
+    }
+   }
+  },
+  "CYCLOPS-ROOM": {
+   "desc": "Cyclops Room",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "NW": {
+     "kind": "to",
+     "to": "MAZE-15"
+    }
+   }
+  },
+  "DEAD-END-3": {
+   "desc": "Dead End",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "MAZE-8"
+    }
+   }
+  },
+  "MAZE-8": {
+   "desc": "Maze",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "MAZE-8"
+    },
+    "NE": {
+     "kind": "to",
+     "to": "MAZE-7"
+    },
+    "SE": {
+     "kind": "to",
+     "to": "DEAD-END-3"
+    }
+   }
+  },
+  "MAZE-5": {
+   "desc": "Maze",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "MAZE-3"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "DEAD-END-2"
+    },
+    "SW": {
+     "kind": "to",
+     "to": "MAZE-6"
+    }
+   }
+  },
+  "TROLL-ROOM": {
+   "desc": "The Troll Room",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "MAZE-1"
+    }
+   }
+  },
+  "DEAD-END-4": {
+   "desc": "Dead End",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "MAZE-12"
+    }
+   }
+  },
+  "MAZE-3": {
+   "desc": "Maze",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "MAZE-4"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MAZE-2"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "MAZE-5"
+    }
+   }
+  },
+  "MAZE-4": {
+   "desc": "Maze",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "MAZE-1"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "DEAD-END-1"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MAZE-3"
+    }
+   }
+  },
+  "MAZE-2": {
+   "desc": "Maze",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "MAZE-1"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "MAZE-3"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "MAZE-4"
+    }
+   }
+  },
+  "MAZE-12": {
+   "desc": "Maze",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "DEAD-END-4"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "MAZE-13"
+    },
+    "SW": {
+     "kind": "to",
+     "to": "MAZE-11"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "MAZE-9"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "MAZE-5"
+    }
+   }
+  },
+  "MAZE-15": {
+   "desc": "Maze",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "MAZE-7"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MAZE-14"
+    },
+    "SE": {
+     "kind": "to",
+     "to": "CYCLOPS-ROOM"
+    }
+   }
+  },
+  "MAZE-14": {
+   "desc": "Maze",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "MAZE-7"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MAZE-15"
+    },
+    "NE": {
+     "kind": "to",
+     "to": "MAZE-7"
+    },
+    "NW": {
+     "kind": "to",
+     "to": "MAZE-14"
+    }
+   }
+  },
+  "GRATING-ROOM": {
+   "desc": "Grating Room",
+   "dark": true,
+   "maze": false,
+   "exits": {
+    "SW": {
+     "kind": "to",
+     "to": "MAZE-11"
+    }
+   }
+  },
+  "MAZE-1": {
+   "desc": "Maze",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "MAZE-1"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "MAZE-2"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "TROLL-ROOM"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MAZE-4"
+    }
+   }
+  },
+  "MAZE-9": {
+   "desc": "Maze",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "NORTH": {
+     "kind": "to",
+     "to": "MAZE-6"
+    },
+    "SOUTH": {
+     "kind": "to",
+     "to": "MAZE-13"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "MAZE-10"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MAZE-12"
+    },
+    "NW": {
+     "kind": "to",
+     "to": "MAZE-9"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "MAZE-11"
+    }
+   }
+  },
+  "MAZE-10": {
+   "desc": "Maze",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "MAZE-9"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MAZE-13"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "MAZE-11"
+    }
+   }
+  },
+  "MAZE-6": {
+   "desc": "Maze",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "EAST": {
+     "kind": "to",
+     "to": "MAZE-7"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MAZE-6"
+    },
+    "UP": {
+     "kind": "to",
+     "to": "MAZE-9"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "MAZE-5"
+    }
+   }
+  },
+  "DEAD-END-1": {
+   "desc": "Dead End",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "MAZE-4"
+    }
+   }
+  },
+  "DEAD-END-2": {
+   "desc": "Dead End",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "WEST": {
+     "kind": "to",
+     "to": "MAZE-5"
+    }
+   }
+  },
+  "MAZE-13": {
+   "desc": "Maze",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "SOUTH": {
+     "kind": "to",
+     "to": "MAZE-10"
+    },
+    "EAST": {
+     "kind": "to",
+     "to": "MAZE-9"
+    },
+    "WEST": {
+     "kind": "to",
+     "to": "MAZE-11"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "MAZE-12"
+    }
+   }
+  },
+  "MAZE-11": {
+   "desc": "Maze",
+   "dark": true,
+   "maze": true,
+   "exits": {
+    "NE": {
+     "kind": "to",
+     "to": "GRATING-ROOM"
+    },
+    "NW": {
+     "kind": "to",
+     "to": "MAZE-13"
+    },
+    "SW": {
+     "kind": "to",
+     "to": "MAZE-12"
+    },
+    "DOWN": {
+     "kind": "to",
+     "to": "MAZE-10"
+    }
+   }
+  }
+ }
+}
