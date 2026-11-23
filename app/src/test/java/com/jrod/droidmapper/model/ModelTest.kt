@@ -66,6 +66,59 @@ class MapFactsTest {
     }
 }
 
+class FixLaterTest {
+    private val start = GameMap.starting("Test", "Kitchen")
+
+    @Test
+    fun `a passage that brings you back to the same room is recorded as a loop`() {
+        val m = start.walkTo(Dir.N, "r1")
+        assertEquals("r1", m.exit("r1", Dir.N)!!.to)
+        assertEquals(1, m.passages.size)                    // no way back is assumed for a loop
+    }
+
+    @Test
+    fun `two rooms that turn out to be one are merged`() {
+        // Kitchen -E-> Hall -S-> Yard -W-> "Shed" -N-> a duplicate "Kitchen"
+        val m = start.walkToNew(Dir.E, "Hall").walkToNew(Dir.S, "Yard").walkToNew(Dir.W, "Shed").walkToNew(Dir.N, "Kitchen")
+        val fixed = m.mergeRooms(keep = "r1", drop = "r5")
+        assertEquals(4, fixed.rooms.size)
+        assertEquals("r1", fixed.current)
+        assertEquals("r1", fixed.exit("r4", Dir.N)!!.to)    // Shed north now reaches the real Kitchen
+        assertEquals("r4", fixed.exit("r1", Dir.S)!!.to)    // and the assumed way back came along
+        assertEquals("r2", fixed.exit("r1", Dir.E)!!.to)
+    }
+
+    @Test
+    fun `when merged rooms disagree a walked passage beats an assumed one`() {
+        // Kitchen's west is only assumed (from Hall going east... the other way round here)
+        val m = start.walkToNew(Dir.E, "Hall").jumpToNew("Kitchen").walkToNew(Dir.E, "Pantry")
+        // r1 east -> Hall (walked); r3 east -> Pantry (walked). Survivor r1 keeps its own.
+        val fixed = m.mergeRooms(keep = "r1", drop = "r3")
+        assertEquals("r2", fixed.exit("r1", Dir.E)!!.to)
+        // Hall's assumed west -> r1 stands; Pantry's assumed west now points at r1 too
+        assertEquals("r1", fixed.exit("r4", Dir.W)!!.to)
+    }
+
+    @Test
+    fun `a passage can be re-pointed or removed after the fact`() {
+        val m = start.walkToNew(Dir.E, "Hall").walkToNew(Dir.E, "Yard")
+        val re = m.redirect("r1", Dir.E, "r3")
+        assertEquals("r3", re.exit("r1", Dir.E)!!.to)
+        assertNull(re.passages.firstOrNull { it.from == "r2" && it.dir == Dir.W && it.to == "r1" })   // old assumed way back is gone
+        val gone = m.removePassage("r1", Dir.E)
+        assertNull(gone.exit("r1", Dir.E))
+        assertNull(gone.exit("r2", Dir.W))
+    }
+
+    @Test
+    fun `deleting a room removes its passages and moves you out of it`() {
+        val m = start.walkToNew(Dir.E, "Hall").deleteRoom("r2")
+        assertEquals(listOf("r1"), m.rooms.map { it.id })
+        assertEquals("r1", m.current)
+        assertTrue(m.passages.isEmpty())
+    }
+}
+
 class LayoutTest {
     @Test
     fun `a square of rooms is drawn as a square`() {

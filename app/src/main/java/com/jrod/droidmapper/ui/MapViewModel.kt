@@ -6,8 +6,12 @@ import com.jrod.droidmapper.model.Dir
 import com.jrod.droidmapper.model.GameMap
 import com.jrod.droidmapper.model.Spot
 import com.jrod.droidmapper.model.cannotGo
+import com.jrod.droidmapper.model.deleteRoom
 import com.jrod.droidmapper.model.editRoom
 import com.jrod.droidmapper.model.jumpTo
+import com.jrod.droidmapper.model.mergeRooms
+import com.jrod.droidmapper.model.redirect
+import com.jrod.droidmapper.model.removePassage
 import com.jrod.droidmapper.model.floorsOf
 import com.jrod.droidmapper.model.setOneWay
 import com.jrod.droidmapper.model.walkTo
@@ -26,6 +30,8 @@ data class UiState(
     val canUndo: Boolean = false,
     /** The room whose card is open. */
     val editing: String? = null,
+    /** The room being looked at (read-only), after a single tap. */
+    val viewing: String? = null,
 )
 
 /**
@@ -33,13 +39,13 @@ data class UiState(
  * the player is moved there and nothing is asked. Otherwise the app asks where they
  * arrived, after the tap, when they actually know.
  */
-class MapViewModel(private val store: MapStore) : ViewModel() {
+class MapViewModel(private val store: MapStore, private val mapId: String) : ViewModel() {
     private val history = ArrayDeque<GameMap>()
     private val _state: MutableStateFlow<UiState>
     val state: StateFlow<UiState>
 
     init {
-        val map = store.load() ?: GameMap.starting("My map", "")
+        val map = store.load(mapId) ?: GameMap.starting("Untitled map", "")
         // A brand-new map opens on the first room's card so it can be named.
         _state = MutableStateFlow(UiState(map, floorsOf(map), editing = map.current.takeIf { map.room(it)?.name.isNullOrBlank() }))
         state = _state.asStateFlow()
@@ -53,7 +59,7 @@ class MapViewModel(private val store: MapStore) : ViewModel() {
         }
         history.addLast(s.map)
         if (history.size > 100) history.removeFirst()
-        store.save(next)
+        store.save(mapId, next)
         _state.value = s.copy(map = next, placed = floorsOf(next), asking = null, followed = followed, canUndo = true)
     }
 
@@ -78,14 +84,33 @@ class MapViewModel(private val store: MapStore) : ViewModel() {
 
     fun undo() {
         val prev = history.removeLastOrNull() ?: return
-        store.save(prev)
+        store.save(mapId, prev)
         _state.value = UiState(prev, floorsOf(prev), canUndo = history.isNotEmpty())
     }
 
-    fun openRoom(roomId: String) { _state.value = _state.value.copy(editing = roomId) }
+    fun openRoom(roomId: String) { _state.value = _state.value.copy(editing = roomId, viewing = null) }
+    fun viewRoom(roomId: String) { _state.value = _state.value.copy(viewing = roomId) }
+    fun closeView() { _state.value = _state.value.copy(viewing = null) }
     fun closeRoom() { _state.value = _state.value.copy(editing = null) }
     fun saveRoom(roomId: String, name: String, description: String, items: String) =
         commit(_state.value.map.editRoom(roomId, name, description, items))
     fun imHere(roomId: String) { commit(_state.value.map.jumpTo(roomId)); closeRoom() }
     fun setOneWay(from: String, dir: Dir, oneWay: Boolean) = commit(_state.value.map.setOneWay(from, dir, oneWay))
+
+    // Fixing things that only become clear later. Each is one undo step.
+    fun stillHere() = _state.value.asking?.let { commit(_state.value.map.walkTo(it, _state.value.map.current)) }
+    fun removeExit(from: String, dir: Dir) = commit(_state.value.map.removePassage(from, dir))
+    fun redirectExit(from: String, dir: Dir, to: String) = commit(_state.value.map.redirect(from, dir, to))
+
+    /** The room whose card is open is really [keep]: fold it in and show the survivor's card. */
+    fun sameRoomAs(keep: String) {
+        val drop = _state.value.editing ?: return
+        commit(_state.value.map.mergeRooms(keep, drop))
+        _state.value = _state.value.copy(editing = keep)
+    }
+
+    fun deleteRoom(roomId: String) {
+        commit(_state.value.map.deleteRoom(roomId))
+        closeRoom()
+    }
 }

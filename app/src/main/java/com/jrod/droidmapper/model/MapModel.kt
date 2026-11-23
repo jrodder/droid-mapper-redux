@@ -169,3 +169,62 @@ fun GameMap.displayNames(): Map<String, String> {
         r.id to if (twins.size == 1) base else "$base (${twins.indexOf(r) + 1})"
     }
 }
+
+// ---- Fixing things that only become clear later ---------------------------------------------
+
+/** Forget the passage leaving [from] by [dir], and the way back if the app had only assumed it. */
+fun GameMap.removePassage(from: String, dir: Dir): GameMap {
+    val p = exit(from, dir) ?: return this
+    return copy(passages = passages.filterNot {
+        it === p || (p.to != null && it.from == p.to && it.dir == dir.opposite && it.to == from && it.assumed)
+    })
+}
+
+/** The passage leaving [from] by [dir] turns out to lead to [newTo] instead. */
+fun GameMap.redirect(from: String, dir: Dir, newTo: String): GameMap {
+    if (room(newTo) == null) return this
+    var facts = removePassage(from, dir).passages + Passage(from, dir, newTo)
+    if (newTo != from && facts.none { it.from == newTo && it.dir == dir.opposite }) {
+        facts = facts + Passage(newTo, dir.opposite, from, assumed = true)
+    }
+    return copy(passages = facts)
+}
+
+/**
+ * [drop] and [keep] turn out to be the same room. Everything known about [drop] moves to
+ * [keep], which keeps its name. Where both have an exit in the same direction, a walked
+ * passage beats an assumed one, and otherwise [keep]'s stands. A passage between the two
+ * is dropped unless it was already a loop.
+ */
+fun GameMap.mergeRooms(keep: String, drop: String): GameMap {
+    val k = room(keep) ?: return this
+    val d = room(drop) ?: return this
+    if (keep == drop) return this
+    fun swap(id: String?) = if (id == drop) keep else id
+    val moved = passages
+        .filterNot { (it.from == keep && it.to == drop) || (it.from == drop && it.to == keep) }
+        .map { it.copy(from = swap(it.from)!!, to = swap(it.to)) }
+    // one exit per direction: walked beats assumed, then the survivor's (earlier) fact wins
+    val chosen = LinkedHashMap<Pair<String, Dir>, Passage>()
+    for (p in moved.sortedBy { it.assumed }) chosen.putIfAbsent(p.from to p.dir, p)
+    val facts = moved.filter { chosen[it.from to it.dir] === it }
+    fun both(a: String, b: String) = listOf(a, b).filter { it.isNotBlank() }.distinct().joinToString("\n")
+    val merged = k.copy(description = both(k.description, d.description), items = both(k.items, d.items))
+    return copy(
+        rooms = rooms.filterNot { it.id == drop }.map { if (it.id == keep) merged else it },
+        passages = facts,
+        current = swap(current)!!,
+    )
+}
+
+/** Remove a room that should never have been made, with every passage touching it. */
+fun GameMap.deleteRoom(roomId: String): GameMap {
+    if (rooms.size < 2 || room(roomId) == null) return this
+    val left = rooms.filterNot { it.id == roomId }
+    val neighbour = passages.firstOrNull { it.to == roomId && it.from != roomId }?.from
+    return copy(
+        rooms = left,
+        passages = passages.filterNot { it.from == roomId || it.to == roomId },
+        current = if (current == roomId) (neighbour ?: left.first().id) else current,
+    )
+}

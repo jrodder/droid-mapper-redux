@@ -159,7 +159,7 @@ private fun buildScene(map: GameMap, spot: Map<String, Spot>): Scene {
 @Composable
 fun MapCanvas(
     map: GameMap, placed: Map<String, Spot>, names: Map<String, String>,
-    onTapRoom: (String) -> Unit, onDoubleTapRoom: (String) -> Unit,
+    onTapRoom: (String) -> Unit, onOpenRoom: (String) -> Unit,
 ) {
     val scheme = MaterialTheme.colorScheme
     val density = LocalDensity.current.density
@@ -197,7 +197,8 @@ fun MapCanvas(
                 }
                 detectTapGestures(
                     onTap = { roomAt(it)?.let(onTapRoom) },
-                    onDoubleTap = { roomAt(it)?.let(onDoubleTapRoom) },
+                    onDoubleTap = { roomAt(it)?.let(onOpenRoom) },      // a double tap or a long press
+                    onLongPress = { roomAt(it)?.let(onOpenRoom) },      // opens the room's card
                 )
             },
     ) {

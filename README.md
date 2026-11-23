@@ -10,12 +10,17 @@ which way you went and what the room is called; it draws the map. You never posi
   to another plate drawn above or below, in the slanted style of Infocom's printed maps.
 - **Passages are assumed two-way** until you say otherwise ("Couldn't go", or the one-way
   switch on a room's card).
-- **Double-tap a room** for its card: name, description and the items lying there. Items
-  are also written beside the room on the map.
+- **Tap a room** to see what you know about it in a frame over the map; tap again to put
+  it away. Items are also written beside the room on the map.
+- **Double-tap or hold a room** for its card: name, description, items, and every way to put
+  right something that only became clear later: mark an exit one-way, say it leads
+  elsewhere, remove it, merge the room with another ("Same room as…"), or delete it.
+- **One map per game.** The list of maps is where you make, rename and delete them; the app
+  reopens on the map you were last in.
 
-| Map and direction pad | Arrival panel | Room card |
-|---|---|---|
-| ![Map and direction pad](docs/screen-direction-pad.png) | ![Arrival panel](docs/screen-arrival-panel.png) | ![Room card](docs/screen-room-card.png) |
+| Map and direction pad | Arrival panel | Room view | Room card | Maps |
+|---|---|---|---|---|
+| ![Map and direction pad](docs/screen-direction-pad.png) | ![Arrival panel](docs/screen-arrival-panel.png) | ![Room view](docs/screen-room-view.png) | ![Room card](docs/screen-room-card.png) | ![Maps](docs/screen-map-list.png) |
 
 ## Install on a phone
 

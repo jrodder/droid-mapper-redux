@@ -50,6 +50,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.jrod.droidmapper.model.Dir
 import com.jrod.droidmapper.model.GameMap
 import com.jrod.droidmapper.model.Passage
@@ -58,15 +59,17 @@ import com.jrod.droidmapper.model.displayNames
 import com.jrod.droidmapper.model.guessArrival
 
 @Composable
-fun MapScreen(vm: MapViewModel) {
+fun MapScreen(vm: MapViewModel, onMaps: () -> Unit) {
     val s by vm.state.collectAsState()
+    BackHandler(onBack = onMaps)        // back leaves the map for the list (unless a question is open, below)
     val names = remember(s.map.rooms) { s.map.displayNames() }
     // The whole screen rises above the keyboard, so nothing the player needs is ever behind it.
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).systemBarsPadding().imePadding()) {
         Row(
-            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+            Modifier.fillMaxWidth().padding(end = 12.dp, top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            TextButton(onClick = onMaps) { Text("\u2039 Maps") }
             Text(
                 names[s.map.current] ?: "",
                 style = MaterialTheme.typography.titleMedium,
@@ -77,11 +80,12 @@ fun MapScreen(vm: MapViewModel) {
         }
         Box(Modifier.weight(1f).fillMaxWidth()) {
             // While the app is asking where you arrived, tapping a room on the map is an answer.
-            // A double tap opens a room's card (name, description, items).
+            // A double tap or a long press opens a room's card: everything about it, and every fix.
             MapCanvas(
                 s.map, s.placed, names,
-                onTapRoom = { if (s.asking != null) vm.arrivedAt(it) },
-                onDoubleTapRoom = { if (s.asking == null) vm.openRoom(it) },
+                // A single tap shows what is known about a room; while the app is asking, it answers.
+                onTapRoom = { if (s.asking != null) vm.arrivedAt(it) else vm.viewRoom(it) },
+                onOpenRoom = { if (s.asking == null) vm.openRoom(it) },
             )
         }
         val asking = s.asking
@@ -95,6 +99,7 @@ fun MapScreen(vm: MapViewModel) {
                 onRoom = { vm.arrivedAt(it) },
                 onNew = { vm.arrivedSomewhereNew(it) },
                 onCouldNot = { vm.couldNotGo() },
+                onStillHere = { vm.stillHere() },
                 onCancel = vm::stopAsking,
             )
         } else {
@@ -115,16 +120,22 @@ fun MapScreen(vm: MapViewModel) {
             DirectionPad(s.map, onDirection = vm::tapDirection, onHere = { vm.openRoom(s.map.current) })
         }
     }
+    s.viewing?.let { id ->
+        s.map.room(id)?.let { room -> RoomGlance(room, s.map, names, onClose = vm::closeView) }
+    }
     s.editing?.let { id ->
         s.map.room(id)?.let { room ->
             RoomCard(
                 room = room,
-                isCurrent = id == s.map.current,
-                exits = s.map.exitsOf(id).filter { it.to != null && it.to != id && !it.assumed },
+                map = s.map,
                 names = names,
                 onSave = { n, d, i -> vm.saveRoom(id, n, d, i) },
                 onImHere = { vm.imHere(id) },
                 onOneWay = { d, on -> vm.setOneWay(id, d, on) },
+                onRedirect = { d, to -> vm.redirectExit(id, d, to) },
+                onRemoveExit = { d -> vm.removeExit(id, d) },
+                onSameAs = { vm.sameRoomAs(it) },
+                onDelete = { vm.deleteRoom(id) },
                 onClose = vm::closeRoom,
             )
         }
@@ -210,6 +221,7 @@ private fun ArrivalPanel(
     onRoom: (String) -> Unit,
     onNew: (String) -> Unit,
     onCouldNot: () -> Unit,
+    onStillHere: () -> Unit,
     onCancel: () -> Unit,
 ) {
     var name by remember(dir, map.current) { mutableStateOf("") }
@@ -235,6 +247,8 @@ private fun ArrivalPanel(
                 }
             }
             OutlinedButton(onClick = { answered(onCouldNot) }) { Text("Couldn't go") }
+            // the game moved you but you are in the same room: a passage that loops back
+            OutlinedButton(onClick = { answered(onStillHere) }) { Text("Still here") }
         }
         Row(Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
@@ -263,23 +277,92 @@ private fun ArrivalPanel(
     }
 }
 
-/** A room's card: what it is called, what the game says about it, and what is lying there. */
+/**
+ * What is known about a room, in a frame over the map. Nothing here can be changed; a tap
+ * anywhere puts it away. (Editing is a double tap or a long press on the room.)
+ */
+@Composable
+private fun RoomGlance(room: Room, map: GameMap, names: Map<String, String>, onClose: () -> Unit) {
+    val scheme = MaterialTheme.colorScheme
+    Dialog(onDismissRequest = onClose) {
+        Surface(
+            color = scheme.surface,
+            shape = RoundedCornerShape(6.dp),
+            border = BorderStroke(3.dp, scheme.secondary),
+            modifier = Modifier.fillMaxWidth().clickable(onClick = onClose),
+        ) {
+            // a second, thin rule inside the first, like the frame of a printed plate
+            Surface(
+                color = scheme.surface,
+                shape = RoundedCornerShape(3.dp),
+                border = BorderStroke(1.dp, scheme.outline),
+                modifier = Modifier.padding(6.dp),
+            ) {
+                Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp).verticalScroll(rememberScrollState())) {
+                    Text(names[room.id] ?: "", style = MaterialTheme.typography.titleLarge)
+                    if (room.id == map.current) {
+                        Text("You are here", style = MaterialTheme.typography.labelLarge, color = scheme.primary)
+                    }
+                    Text(
+                        room.description.ifBlank { "No description yet." },
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if (room.description.isBlank()) scheme.onSurfaceVariant else scheme.onSurface,
+                        modifier = Modifier.padding(top = 10.dp),
+                    )
+                    if (room.items.isNotBlank()) {
+                        Text("Items", style = MaterialTheme.typography.titleSmall, color = scheme.secondary, modifier = Modifier.padding(top = 12.dp))
+                        Text(room.items, style = MaterialTheme.typography.bodyLarge)
+                    }
+                    val exits = map.exitsOf(room.id).sortedBy { it.dir.ordinal }
+                    if (exits.isNotEmpty()) {
+                        Text("Exits", style = MaterialTheme.typography.titleSmall, color = scheme.secondary, modifier = Modifier.padding(top = 12.dp))
+                        for (e in exits) {
+                            val to = e.to
+                            val where = when {
+                                to == null -> "couldn't go"
+                                to == room.id -> "back here"
+                                else -> (names[to] ?: "") + if (e.oneWay) " (one-way)" else ""
+                            }
+                            Text("${e.dir.word}: $where", style = MaterialTheme.typography.bodyLarge)
+                        }
+                    }
+                    Text(
+                        "Tap to close. Double-tap or hold a room to edit it.",
+                        style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 14.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A room's card: what it is called, what the game says about it, what is lying there, and
+ * every way to put right something that only became clear later.
+ */
 @Composable
 private fun RoomCard(
     room: Room,
-    isCurrent: Boolean,
-    exits: List<Passage>,
+    map: GameMap,
     names: Map<String, String>,
     onSave: (name: String, description: String, items: String) -> Unit,
     onImHere: () -> Unit,
     onOneWay: (Dir, Boolean) -> Unit,
+    onRedirect: (Dir, String) -> Unit,
+    onRemoveExit: (Dir) -> Unit,
+    onSameAs: (String) -> Unit,
+    onDelete: () -> Unit,
     onClose: () -> Unit,
 ) {
     var name by remember(room.id) { mutableStateOf(room.name) }
     var description by remember(room.id) { mutableStateOf(room.description) }
     var items by remember(room.id) { mutableStateOf(room.items) }
+    var picking by remember(room.id) { mutableStateOf<Pick?>(null) }
+    var confirmDelete by remember(room.id) { mutableStateOf(false) }
     // Leaving the card any way at all saves it; a blank name keeps the old one.
     fun save() = onSave(name.ifBlank { room.name }, description, items)
+    val exits = map.exitsOf(room.id)
     AlertDialog(
         onDismissRequest = { save(); onClose() },
         title = { Text(if (room.name.isBlank()) "Name the room you start in" else "Room") },
@@ -303,17 +386,98 @@ private fun RoomCard(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 )
                 if (exits.isNotEmpty()) {
-                    Text("One-way?", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 12.dp))
+                    Text("Exits", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 14.dp))
                 }
                 for (e in exits) {
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Text("${e.dir.label} to ${names[e.to] ?: ""}", modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        Switch(checked = e.oneWay, onCheckedChange = { onOneWay(e.dir, it) })
+                    val to = e.to
+                    val where = when {
+                        to == null -> "couldn't go"
+                        to == room.id -> "back here"
+                        e.assumed -> "${names[to]} (assumed)"
+                        else -> names[to] ?: ""
+                    }
+                    Text("${e.dir.word}: $where", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (to != null && to != room.id && !e.assumed) {
+                            Text("One-way", style = MaterialTheme.typography.bodyMedium)
+                            Switch(checked = e.oneWay, onCheckedChange = { onOneWay(e.dir, it) }, modifier = Modifier.padding(horizontal = 6.dp))
+                        }
+                        Spacer(Modifier.weight(1f))
+                        TextButton(onClick = { picking = Pick.Redirect(e.dir) }) { Text("Leads elsewhere") }
+                        TextButton(onClick = { onRemoveExit(e.dir) }) { Text("Remove") }
+                    }
+                }
+                Text("This room", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 14.dp))
+                Row {
+                    if (map.rooms.size > 1) {
+                        TextButton(onClick = { save(); picking = Pick.SameAs }) { Text("Same room as\u2026") }
+                        TextButton(onClick = { confirmDelete = true }) { Text("Delete") }
                     }
                 }
             }
         },
         confirmButton = { TextButton(onClick = { save(); onClose() }) { Text("Done") } },
-        dismissButton = { if (!isCurrent) TextButton(onClick = { save(); onImHere() }) { Text("I'm here now") } },
+        dismissButton = { if (room.id != map.current) TextButton(onClick = { save(); onImHere() }) { Text("I'm here now") } },
+    )
+    picking?.let { pick ->
+        RoomPicker(
+            title = when (pick) {
+                is Pick.Redirect -> "Going ${pick.dir.word} from ${names[room.id]} leads to\u2026"
+                Pick.SameAs -> "${names[room.id]} is the same room as\u2026"
+            },
+            rooms = map.rooms.filter { it.id != room.id || pick is Pick.Redirect },
+            names = names,
+            onPick = { chosen ->
+                picking = null
+                when (pick) {
+                    is Pick.Redirect -> onRedirect(pick.dir, chosen)
+                    Pick.SameAs -> onSameAs(chosen)
+                }
+            },
+            onCancel = { picking = null },
+        )
+    }
+    if (confirmDelete) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text("Delete ${names[room.id]}?") },
+            text = { Text("The room and every passage to or from it are removed. Undo brings them back.") },
+            confirmButton = { TextButton(onClick = { confirmDelete = false; onDelete() }) { Text("Delete") } },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancel") } },
+        )
+    }
+}
+
+private sealed interface Pick {
+    data class Redirect(val dir: Dir) : Pick
+    data object SameAs : Pick
+}
+
+/** Choose one of the known rooms, narrowing the list by typing. */
+@Composable
+private fun RoomPicker(title: String, rooms: List<Room>, names: Map<String, String>, onPick: (String) -> Unit, onCancel: () -> Unit) {
+    var filter by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text(title, style = MaterialTheme.typography.titleMedium) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = filter, onValueChange = { filter = it }, label = { Text("Find a room") }, singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    val shown = rooms.filter { (names[it.id] ?: "").contains(filter.trim(), ignoreCase = true) }
+                        .sortedBy { (names[it.id] ?: "").lowercase() }
+                    for (r in shown) {
+                        TextButton(onClick = { onPick(r.id) }, modifier = Modifier.fillMaxWidth()) {
+                            Text(names[r.id] ?: "", modifier = Modifier.fillMaxWidth())
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = { TextButton(onClick = onCancel) { Text("Cancel") } },
     )
 }
