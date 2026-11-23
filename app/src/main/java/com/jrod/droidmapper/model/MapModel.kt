@@ -28,7 +28,14 @@ enum class Dir(val dx: Int, val dy: Int, val label: String) {
 }
 
 @Serializable
-data class Room(val id: String, val name: String, val notes: String = "")
+data class Room(
+    val id: String,
+    val name: String,
+    /** What the game says about the room, in the player's words or pasted in. */
+    val description: String = "",
+    /** What is lying here. Shown beside the room on the map, as printed maps do. */
+    val items: String = "",
+)
 
 /**
  * One fact: leaving [from] by [dir] leads to [to].
@@ -132,6 +139,12 @@ fun GameMap.jumpToNew(name: String): GameMap {
 
 fun GameMap.rename(roomId: String, name: String): GameMap =
     copy(rooms = rooms.map { if (it.id == roomId) it.copy(name = name.trim()) else it })
+
+/** Save a room's card: its name, description and items. */
+fun GameMap.editRoom(roomId: String, name: String, description: String, items: String): GameMap =
+    copy(rooms = rooms.map {
+        if (it.id == roomId) it.copy(name = name.trim(), description = description.trim(), items = items.trim()) else it
+    })
 
 /** Mark the passage leaving [from] by [dir] one-way (dropping any way back the app had assumed), or clear the mark. */
 fun GameMap.setOneWay(from: String, dir: Dir, oneWay: Boolean): GameMap {

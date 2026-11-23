@@ -6,12 +6,16 @@ which way you went and what the room is called; it draws the map. You never posi
 - **One tap per move.** A direction pad is always on screen.
 - **It asks after you move.** If the map doesn't know where a direction leads, it asks where
   you arrived, offering its best guesses first so closing a loop is one more tap.
+- **Floors are stacked.** Rooms you can walk between share a plate; going up or down leads
+  to another plate drawn above or below, in the slanted style of Infocom's printed maps.
 - **Passages are assumed two-way** until you say otherwise ("Couldn't go", or the one-way
   switch on a room's card).
+- **Double-tap a room** for its card: name, description and the items lying there. Items
+  are also written beside the room on the map.
 
-| Direction pad | Arrival panel |
-|---|---|
-| ![Direction pad](docs/screen-direction-pad.png) | ![Arrival panel](docs/screen-arrival-panel.png) |
+| Map and direction pad | Arrival panel | Room card |
+|---|---|---|
+| ![Map and direction pad](docs/screen-direction-pad.png) | ![Arrival panel](docs/screen-arrival-panel.png) | ![Room card](docs/screen-room-card.png) |
 
 ## Install on a phone
 

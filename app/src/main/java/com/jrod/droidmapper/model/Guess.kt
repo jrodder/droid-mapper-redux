@@ -9,7 +9,7 @@ package com.jrod.droidmapper.model
  *  - a room whose opposite side is still free, so the way back could be the plain reverse,
  *  - how few known passages away the room is.
  */
-fun guessArrival(map: GameMap, placed: Map<String, Placed>, dir: Dir, limit: Int = 3): List<Room> {
+fun guessArrival(map: GameMap, placed: Map<String, Spot>, dir: Dir, limit: Int = 3): List<Room> {
     val here = map.current
     val at = placed[here]
     val steps = HashMap<String, Int>().apply { put(here, 0) }
@@ -24,7 +24,7 @@ fun guessArrival(map: GameMap, placed: Map<String, Placed>, dir: Dir, limit: Int
     fun score(r: Room): Int {
         var s = 0
         val p = placed[r.id]
-        if (dir.isCompass && at != null && p != null && p.area == at.area) {
+        if (dir.isCompass && at != null && p != null && p.plate == at.plate) {
             val dx = p.x - at.x
             val dy = p.y - at.y
             if (dx == dir.dx && dy == dir.dy) s += 4                                  // sits where the exit points

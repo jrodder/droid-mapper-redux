@@ -53,6 +53,13 @@ class MapFactsTest {
     }
 
     @Test
+    fun `a room card keeps its description and items`() {
+        val m = start.editRoom("r1", "Kitchen", "A table has been used recently.", "Brown sack\nGlass bottle")
+        assertEquals("A table has been used recently.", m.room("r1")!!.description)
+        assertEquals("Brown sack\nGlass bottle", m.room("r1")!!.items)
+    }
+
+    @Test
     fun `same-named rooms are numbered`() {
         val m = start.walkToNew(Dir.E, "Forest").walkToNew(Dir.E, "Forest")
         assertEquals(listOf("Kitchen", "Forest (1)", "Forest (2)"), m.rooms.map { m.displayNames().getValue(it.id) })
@@ -85,7 +92,45 @@ class LayoutTest {
     @Test
     fun `the best guess for a loop-closing move is the room drawn where the exit points`() {
         val m = GameMap.starting("T", "A").walkToNew(Dir.E, "B").walkToNew(Dir.S, "C").walkToNew(Dir.W, "D")
-        assertEquals("A", guessArrival(m, layoutOf(m), Dir.N).first().name)
+        assertEquals("A", guessArrival(m, floorsOf(m), Dir.N).first().name)
+    }
+}
+
+class FloorsTest {
+    private val house = GameMap.starting("T", "Kitchen").walkToNew(Dir.E, "Hall")
+
+    @Test
+    fun `rooms you can walk between share a plate and a level`() {
+        val f = floorsOf(house)
+        assertEquals(f.getValue("r1").plate, f.getValue("r2").plate)
+        assertEquals(Spot(f.getValue("r1").plate, 0, 1, 0), f["r2"])
+    }
+
+    @Test
+    fun `going up leads to a plate one level higher, directly above`() {
+        val f = floorsOf(house.walkToNew(Dir.UP, "Landing"))
+        val hall = f.getValue("r2")
+        val landing = f.getValue("r3")
+        assertTrue(landing.plate != hall.plate)
+        assertEquals(1, landing.level)
+        assertEquals(hall.x to hall.y, landing.x to landing.y)
+    }
+
+    @Test
+    fun `down then down again is two levels below`() {
+        val f = floorsOf(house.walkToNew(Dir.DOWN, "Cellar").walkToNew(Dir.DOWN, "Pit"))
+        assertEquals(-1, f.getValue("r3").level)
+        assertEquals(-2, f.getValue("r4").level)
+    }
+
+    @Test
+    fun `two ways down to the same floor keep it one level below`() {
+        // Kitchen-Hall above; Cellar-Vault below; stairs at both ends.
+        val m = house.walkToNew(Dir.DOWN, "Vault").walkToNew(Dir.W, "Cellar").walkTo(Dir.UP, "r1")
+        val f = floorsOf(m)
+        assertEquals(f.getValue("r3").plate, f.getValue("r4").plate)
+        assertEquals(-1, f.getValue("r4").level)
+        assertEquals(f.getValue("r1").x, f.getValue("r4").x)      // Cellar sits under Kitchen
     }
 }
 

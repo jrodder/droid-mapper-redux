@@ -4,11 +4,11 @@ import androidx.lifecycle.ViewModel
 import com.jrod.droidmapper.data.MapStore
 import com.jrod.droidmapper.model.Dir
 import com.jrod.droidmapper.model.GameMap
-import com.jrod.droidmapper.model.Placed
+import com.jrod.droidmapper.model.Spot
 import com.jrod.droidmapper.model.cannotGo
+import com.jrod.droidmapper.model.editRoom
 import com.jrod.droidmapper.model.jumpTo
-import com.jrod.droidmapper.model.layoutOf
-import com.jrod.droidmapper.model.rename
+import com.jrod.droidmapper.model.floorsOf
 import com.jrod.droidmapper.model.setOneWay
 import com.jrod.droidmapper.model.walkTo
 import com.jrod.droidmapper.model.walkToNew
@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 data class UiState(
     val map: GameMap,
-    val placed: Map<String, Placed>,
+    val placed: Map<String, Spot>,
     /** The direction just tapped, while the app waits to hear where the player arrived. */
     val asking: Dir? = null,
     /** The direction just followed along a known passage, offered back as "Not here?". */
@@ -41,7 +41,7 @@ class MapViewModel(private val store: MapStore) : ViewModel() {
     init {
         val map = store.load() ?: GameMap.starting("My map", "")
         // A brand-new map opens on the first room's card so it can be named.
-        _state = MutableStateFlow(UiState(map, layoutOf(map), editing = map.current.takeIf { map.room(it)?.name.isNullOrBlank() }))
+        _state = MutableStateFlow(UiState(map, floorsOf(map), editing = map.current.takeIf { map.room(it)?.name.isNullOrBlank() }))
         state = _state.asStateFlow()
     }
 
@@ -54,7 +54,7 @@ class MapViewModel(private val store: MapStore) : ViewModel() {
         history.addLast(s.map)
         if (history.size > 100) history.removeFirst()
         store.save(next)
-        _state.value = s.copy(map = next, placed = layoutOf(next), asking = null, followed = followed, canUndo = true)
+        _state.value = s.copy(map = next, placed = floorsOf(next), asking = null, followed = followed, canUndo = true)
     }
 
     fun tapDirection(dir: Dir) {
@@ -79,12 +79,13 @@ class MapViewModel(private val store: MapStore) : ViewModel() {
     fun undo() {
         val prev = history.removeLastOrNull() ?: return
         store.save(prev)
-        _state.value = UiState(prev, layoutOf(prev), canUndo = history.isNotEmpty())
+        _state.value = UiState(prev, floorsOf(prev), canUndo = history.isNotEmpty())
     }
 
     fun openRoom(roomId: String) { _state.value = _state.value.copy(editing = roomId) }
     fun closeRoom() { _state.value = _state.value.copy(editing = null) }
-    fun rename(roomId: String, name: String) = commit(_state.value.map.rename(roomId, name))
+    fun saveRoom(roomId: String, name: String, description: String, items: String) =
+        commit(_state.value.map.editRoom(roomId, name, description, items))
     fun imHere(roomId: String) { commit(_state.value.map.jumpTo(roomId)); closeRoom() }
     fun setOneWay(from: String, dir: Dir, oneWay: Boolean) = commit(_state.value.map.setOneWay(from, dir, oneWay))
 }

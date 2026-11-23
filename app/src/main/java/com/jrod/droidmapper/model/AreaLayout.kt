@@ -38,7 +38,7 @@ private val ANY_CELLS = listOf(
  * This is a port of research/islands.py, and LayoutParityTest holds it to that prototype's
  * exact output on a 302-move Zork I walk.
  */
-class AreaLayout(start: String) {
+class AreaLayout(start: String, private val dock: Boolean = true) {
     var pos = LinkedHashMap<String, Cell>()
         private set
     var area = LinkedHashMap<String, Int>()
@@ -270,7 +270,8 @@ class AreaLayout(start: String) {
         val soft = !d.isCompass
         if (isNew) {
             if (soft) {
-                if (!tryDock(frm, d, to)) newArea(to)
+                // With docking off (the floors map), stairs always lead to a separate area.
+                if (!(dock && tryDock(frm, d, to))) newArea(to)
                 return
             }
             fun wanted() = Cell(pos.getValue(frm).x + d.dx, pos.getValue(frm).y + d.dy)
@@ -327,8 +328,8 @@ fun clear(pos: Map<String, Cell>, taken: Set<Cell>, a: String, b: String, d: Dir
  * Where every room of [map] is drawn. Replays the walked passages in the order they were
  * learned; a way back the app only assumed says nothing new and is skipped.
  */
-fun layoutOf(map: GameMap): Map<String, Placed> {
-    val engine = AreaLayout(map.rooms.first().id)
+fun layoutOf(map: GameMap, dock: Boolean = true): Map<String, Placed> {
+    val engine = AreaLayout(map.rooms.first().id, dock)
     for (p in map.passages) {
         val to = p.to ?: continue
         if (p.assumed) continue

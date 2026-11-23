@@ -18,7 +18,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
@@ -51,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import com.jrod.droidmapper.model.Dir
 import com.jrod.droidmapper.model.GameMap
 import com.jrod.droidmapper.model.Passage
+import com.jrod.droidmapper.model.Room
 import com.jrod.droidmapper.model.displayNames
 import com.jrod.droidmapper.model.guessArrival
 
@@ -74,7 +77,12 @@ fun MapScreen(vm: MapViewModel) {
         }
         Box(Modifier.weight(1f).fillMaxWidth()) {
             // While the app is asking where you arrived, tapping a room on the map is an answer.
-            MapCanvas(s.map, s.placed, names, onTapRoom = { if (s.asking != null) vm.arrivedAt(it) else vm.openRoom(it) })
+            // A double tap opens a room's card (name, description, items).
+            MapCanvas(
+                s.map, s.placed, names,
+                onTapRoom = { if (s.asking != null) vm.arrivedAt(it) },
+                onDoubleTapRoom = { if (s.asking == null) vm.openRoom(it) },
+            )
         }
         val asking = s.asking
         if (asking != null) {
@@ -110,11 +118,11 @@ fun MapScreen(vm: MapViewModel) {
     s.editing?.let { id ->
         s.map.room(id)?.let { room ->
             RoomCard(
-                name = room.name,
+                room = room,
                 isCurrent = id == s.map.current,
                 exits = s.map.exitsOf(id).filter { it.to != null && it.to != id && !it.assumed },
                 names = names,
-                onRename = { vm.rename(id, it) },
+                onSave = { n, d, i -> vm.saveRoom(id, n, d, i) },
                 onImHere = { vm.imHere(id) },
                 onOneWay = { d, on -> vm.setOneWay(id, d, on) },
                 onClose = vm::closeRoom,
@@ -255,28 +263,44 @@ private fun ArrivalPanel(
     }
 }
 
+/** A room's card: what it is called, what the game says about it, and what is lying there. */
 @Composable
 private fun RoomCard(
-    name: String,
+    room: Room,
     isCurrent: Boolean,
     exits: List<Passage>,
     names: Map<String, String>,
-    onRename: (String) -> Unit,
+    onSave: (name: String, description: String, items: String) -> Unit,
     onImHere: () -> Unit,
     onOneWay: (Dir, Boolean) -> Unit,
     onClose: () -> Unit,
 ) {
-    var draft by remember(name) { mutableStateOf(name) }
+    var name by remember(room.id) { mutableStateOf(room.name) }
+    var description by remember(room.id) { mutableStateOf(room.description) }
+    var items by remember(room.id) { mutableStateOf(room.items) }
+    // Leaving the card any way at all saves it; a blank name keeps the old one.
+    fun save() = onSave(name.ifBlank { room.name }, description, items)
     AlertDialog(
-        onDismissRequest = { if (draft.isNotBlank() && draft != name) onRename(draft); onClose() },
-        title = { Text(if (name.isBlank()) "Name the room you start in" else "Room") },
+        onDismissRequest = { save(); onClose() },
+        title = { Text(if (room.name.isBlank()) "Name the room you start in" else "Room") },
         text = {
-            Column {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
                 OutlinedTextField(
-                    value = draft, onValueChange = { draft = it }, label = { Text("Name") }, singleLine = true,
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = { if (draft.isNotBlank()) onRename(draft); onClose() }),
+                    value = name, onValueChange = { name = it }, label = { Text("Name") }, singleLine = true,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Next),
                     modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = description, onValueChange = { description = it }, label = { Text("Description") },
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    minLines = 3, maxLines = 8,
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                )
+                OutlinedTextField(
+                    value = items, onValueChange = { items = it }, label = { Text("Items here") },
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    minLines = 2, maxLines = 6,
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 )
                 if (exits.isNotEmpty()) {
                     Text("One-way?", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 12.dp))
@@ -289,11 +313,7 @@ private fun RoomCard(
                 }
             }
         },
-        confirmButton = {
-            TextButton(onClick = { if (draft.isNotBlank()) onRename(draft); onClose() }) { Text("Done") }
-        },
-        dismissButton = {
-            if (!isCurrent) TextButton(onClick = onImHere) { Text("I'm here now") }
-        },
+        confirmButton = { TextButton(onClick = { save(); onClose() }) { Text("Done") } },
+        dismissButton = { if (!isCurrent) TextButton(onClick = { save(); onImHere() }) { Text("I'm here now") } },
     )
 }
