@@ -44,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.contentDescription
@@ -96,7 +97,8 @@ fun MapScreen(vm: MapViewModel, onMaps: () -> Unit) {
             }
             TextButton(onClick = vm::undo, enabled = s.canUndo) { Text("Undo") }
         }
-        Box(Modifier.weight(1f).fillMaxWidth()) {
+        // Clipped, so a floor high on the map can never be drawn over the bar above or the pad below.
+        Box(Modifier.weight(1f).fillMaxWidth().clipToBounds()) {
             // While the app is asking where you arrived, tapping a room on the map is an answer.
             // A double tap or a long press opens a room's card: everything about it, and every fix.
             MapCanvas(
@@ -462,13 +464,15 @@ private fun RoomCard(
                         e.assumed -> "${names[to]} (assumed)"
                         else -> names[to] ?: ""
                     }
-                    Text("${e.dir.word}: $where", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Where it leads, with the one-way switch beside it; the two fixes on a line of their own.
+                    Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("${e.dir.word}: $where", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                         if (to != null && to != room.id && !e.assumed) {
-                            Text("One-way", style = MaterialTheme.typography.bodyMedium)
-                            Switch(checked = e.oneWay, onCheckedChange = { onOneWay(e.dir, it) }, modifier = Modifier.padding(horizontal = 6.dp))
+                            Text("One-way", style = MaterialTheme.typography.bodySmall)
+                            Switch(checked = e.oneWay, onCheckedChange = { onOneWay(e.dir, it) }, modifier = Modifier.padding(start = 6.dp))
                         }
-                        Spacer(Modifier.weight(1f))
+                    }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         TextButton(onClick = { picking = Pick.Redirect(e.dir) }) { Text("Leads elsewhere") }
                         TextButton(onClick = { onRemoveExit(e.dir) }) { Text("Remove") }
                     }

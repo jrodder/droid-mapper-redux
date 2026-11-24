@@ -291,6 +291,9 @@ private fun DrawScope.drawScene(
         }
         solid.add(best!!)
         pending.add(laid to best.topLeft)
+        // A label that had to move aside keeps a thin leader back to what it describes.
+        val near = Offset(from.x.coerceIn(best.left, best.right), from.y.coerceIn(best.top, best.bottom))
+        if ((near - from).getDistance() > 9f) drawLine(muted, from, near, 1f)
     }
     fun arrow(tip: Offset, u: Offset, color: Color) {
         val a = atan2(u.y, u.x)
@@ -308,6 +311,21 @@ private fun DrawScope.drawScene(
         label("$word ${names[other]}", end, u, style)
     }
 
+    // Stairways are known before any label is placed, so no label is ever set down on one.
+    for (l in scene.links) if (l.kind == Kind.STAIR) {
+        val ca = scene.centre.getValue(l.a)
+        val cb = scene.centre.getValue(l.b)
+        val hi = if (ca.y < cb.y) ca else cb
+        val lo = if (ca.y < cb.y) cb else ca
+        // a run of small boxes down the line, since the line may lean
+        val steps = ((lo.y - hi.y) / 14f).toInt().coerceAtLeast(1)
+        for (i in 0..steps) {
+            val t = i / steps.toFloat()
+            val x = hi.x - LEAN + (lo.x + LEAN - (hi.x - LEAN)) * t
+            val y = hi.y + TILE_D / 2 + (lo.y - TILE_D / 2 - (hi.y + TILE_D / 2)) * t
+            solid.add(Rect(x - 5f, y - 8f, x + 5f, y + 8f))
+        }
+    }
     for (l in scene.links) {
         val ca = scene.centre.getValue(l.a)
         val cb = scene.centre.getValue(l.b)
