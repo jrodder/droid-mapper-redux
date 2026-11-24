@@ -40,12 +40,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.sp
-import com.jrod.droidmapper.model.Cell
+import com.jrod.droidmapper.model.DrawnLink
+import com.jrod.droidmapper.model.LinkKind
+import com.jrod.droidmapper.model.drawingOf
 import com.jrod.droidmapper.model.Dir
 import com.jrod.droidmapper.model.GameMap
 import com.jrod.droidmapper.model.Passage
 import com.jrod.droidmapper.model.Spot
-import com.jrod.droidmapper.model.clear
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -68,18 +69,13 @@ private const val PLATE_PAD = 0.58f    // how far a plate reaches beyond its out
 /** How far a tile's top edge leans east of its centre line (and its bottom edge west). */
 private const val LEAN = SLANT * TILE_D / CELL_D / 2
 
-private enum class Kind { STRAIGHT, STAIR, STUB }
-
-/** A pair of connected rooms and how it is drawn. */
-private class Link(val a: String, val b: String, val ab: Passage?, val ba: Passage?, val kind: Kind)
-
 /** Everything worked out once per map change, in world units. */
 private class Scene(
     val spot: Map<String, Spot>,
     val centre: Map<String, Offset>,
     val plates: List<List<Offset>>,
     val levelNames: List<Pair<String, Offset>>,
-    val links: List<Link>,
+    val links: List<DrawnLink>,
     val loops: List<Passage>,
     val blocked: List<Passage>,
 )
@@ -121,39 +117,9 @@ private fun buildScene(map: GameMap, spot: Map<String, Spot>): Scene {
         name to Offset(left, (ys.min() + ys.max()) / 2)
     }
 
-    val cells = spot.mapValues { Cell(it.value.x, it.value.y) }
-    val takenBy = spot.values.groupBy({ it.plate }, { Cell(it.x, it.y) }).mapValues { it.value.toSet() }
-    val pairs = LinkedHashMap<Set<String>, MutableList<Passage>>()
-    val loops = ArrayList<Passage>()
-    val blocked = ArrayList<Passage>()
-    for (p in map.passages) {
-        when {
-            p.to == null -> blocked.add(p)
-            p.to == p.from -> loops.add(p)
-            p.from in spot && p.to in spot -> pairs.getOrPut(setOf(p.from, p.to)) { ArrayList() }.add(p)
-        }
-    }
-    val links = pairs.map { (key, ps) ->
-        val (a, b) = key.toList()
-        val sa = spot.getValue(a)
-        val sb = spot.getValue(b)
-        val same = sa.plate == sb.plate
-        // Prefer the passage the drawing already shows correctly, so a duplicate exit never bends the line.
-        fun shown(p: Passage) = same && p.dir.isCompass && clear(cells, takenBy.getValue(sa.plate), p.from, p.to!!, p.dir)
-        fun pick(from: String) = ps.filter { it.from == from }
-            .let { l -> l.firstOrNull(::shown) ?: l.firstOrNull { it.dir.isCompass } ?: l.firstOrNull() }
-        // On a stairway the up/down passage is the one to draw, whatever else joins the pair.
-        fun stair(from: String) = ps.firstOrNull { it.from == from && it.climbs() }
-        val sideways = abs(centre.getValue(a).x - centre.getValue(b).x)
-        val kind = when {
-            same && ps.any(::shown) -> Kind.STRAIGHT
-            !same && ps.any { it.climbs() } && sa.level != sb.level && sideways <= 2.5f * CELL_W -> Kind.STAIR
-            else -> Kind.STUB
-        }
-        if (ps.any { it.climbs() } && !same) Link(a, b, stair(a) ?: pick(a), stair(b) ?: pick(b), kind)
-        else Link(a, b, pick(a), pick(b), kind)
-    }
-    return Scene(spot, centre, plates, levelNames, links, loops, blocked)
+    // Which passages are lines, stairs or labelled stubs is decided in the model (and tested there).
+    val drawing = drawingOf(map, spot, lean = SLANT / CELL_W)
+    return Scene(spot, centre, plates, levelNames, drawing.links, drawing.loops, drawing.blocked)
 }
 
 @Composable
@@ -169,11 +135,23 @@ fun MapCanvas(
     var zoom by remember { mutableFloatStateOf(1f) }
     val pan = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
     val scope = rememberCoroutineScope()
+    var whole by remember { mutableStateOf(false) }     // showing the whole map instead of following the player
 
     // The map follows the player: whenever the current room or its position changes, glide it to the middle.
     val here = scene.centre[map.current]
-    LaunchedEffect(map.current, here, size) {
-        if (here != null && size != IntSize.Zero) {
+    // Double-tapping empty space shows the whole map; doing it again returns to the player.
+    LaunchedEffect(map.current, here, size, whole) {
+        if (here == null || size == IntSize.Zero) return@LaunchedEffect
+        if (whole) {
+            val xs = scene.centre.values.map { it.x }
+            val ys = scene.centre.values.map { it.y }
+            val w = xs.max() - xs.min() + TILE_W * 1.6f
+            val h = ys.max() - ys.min() + TILE_D * 2.4f
+            zoom = minOf(size.width / (w * density), size.height / (h * density)).coerceIn(0.06f, 1f)
+            val middle = Offset((xs.max() + xs.min()) / 2, (ys.max() + ys.min()) / 2)
+            pan.animateTo(Offset(size.width / 2f, size.height / 2f) - middle * (density * zoom))
+        } else {
+            if (zoom < 0.3f) zoom = 1f
             pan.animateTo(Offset(size.width / 2f, size.height / 2f) - here * (density * zoom))
         }
     }
@@ -183,7 +161,7 @@ fun MapCanvas(
             .onSizeChanged { size = it }
             .pointerInput(Unit) {
                 detectTransformGestures { centroid, drag, change, _ ->
-                    val next = (zoom * change).coerceIn(0.3f, 2.5f)
+                    val next = (zoom * change).coerceIn(0.06f, 2.5f)
                     val kept = centroid - (centroid - pan.value) * (next / zoom)   // zoom about the fingers
                     zoom = next
                     scope.launch { pan.snapTo(kept + drag) }
@@ -197,7 +175,7 @@ fun MapCanvas(
                 }
                 detectTapGestures(
                     onTap = { roomAt(it)?.let(onTapRoom) },
-                    onDoubleTap = { roomAt(it)?.let(onOpenRoom) },      // a double tap or a long press
+                    onDoubleTap = { roomAt(it)?.let(onOpenRoom) ?: run { whole = !whole } },   // on a room: its card
                     onLongPress = { roomAt(it)?.let(onOpenRoom) },      // opens the room's card
                 )
             },
@@ -312,7 +290,7 @@ private fun DrawScope.drawScene(
     }
 
     // Stairways are known before any label is placed, so no label is ever set down on one.
-    for (l in scene.links) if (l.kind == Kind.STAIR) {
+    for (l in scene.links) if (l.kind == LinkKind.STAIR) {
         val ca = scene.centre.getValue(l.a)
         val cb = scene.centre.getValue(l.b)
         val hi = if (ca.y < cb.y) ca else cb
@@ -332,14 +310,14 @@ private fun DrawScope.drawScene(
         val la = scene.spot.getValue(l.a).level
         val lb = scene.spot.getValue(l.b).level
         when (l.kind) {
-            Kind.STRAIGHT -> {
+            LinkKind.STRAIGHT -> {
                 val (pa, ua) = port(ca, l.ab?.dir ?: l.ba?.dir?.opposite, cb)
                 val (pb, ub) = port(cb, l.ba?.dir ?: l.ab?.dir?.opposite, ca)
                 drawLine(ink, pa, pb, 2f)
                 if (l.ab?.oneWay == true) arrow(pb, -ub, ink)
                 if (l.ba?.oneWay == true) arrow(pa, -ua, ink)
             }
-            Kind.STAIR -> {
+            LinkKind.STAIR -> {
                 // from the bottom edge of the upper room to the top edge of the lower one
                 val aIsUpper = la > lb
                 val hi = if (aIsUpper) ca else cb
@@ -353,7 +331,7 @@ private fun DrawScope.drawScene(
                 if ((if (aIsUpper) l.ab else l.ba)?.oneWay == true) arrow(to, u, accent)       // only down
                 if ((if (aIsUpper) l.ba else l.ab)?.oneWay == true) arrow(from, -u, accent)    // only up
             }
-            Kind.STUB -> {
+            LinkKind.STUB -> {
                 val climb = l.ab?.climbs() == true || l.ba?.climbs() == true
                 if (climb && la != lb) {
                     // stairs too far sideways to draw: a short stub straight up or down, naming the other end

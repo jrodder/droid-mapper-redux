@@ -45,6 +45,17 @@ class MapFactsTest {
     }
 
     @Test
+    fun `a passage that returns by a different direction is bent, not one-way`() {
+        // East from Kitchen to Hall; west from Hall is refused; southwest from Hall leads back.
+        val refusedFirst = start.walkToNew(Dir.E, "Hall").cannotGo(Dir.W)
+        assertTrue(refusedFirst.exit("r1", Dir.E)!!.oneWay)              // no way back known yet
+        val thenBack = refusedFirst.walkTo(Dir.SW, "r1")
+        assertEquals(false, thenBack.exit("r1", Dir.E)!!.oneWay)         // found one: the mark goes
+        val backFirst = start.walkToNew(Dir.E, "Hall").walkTo(Dir.SW, "r1").jumpTo("r2").cannotGo(Dir.W)
+        assertEquals(false, backFirst.exit("r1", Dir.E)!!.oneWay)        // never marked at all
+    }
+
+    @Test
     fun `closing a loop into a known room makes no new room`() {
         val m = start.walkToNew(Dir.E, "Hall").walkToNew(Dir.S, "Yard").walkToNew(Dir.W, "Shed").walkTo(Dir.N, "r1")
         assertEquals(4, m.rooms.size)

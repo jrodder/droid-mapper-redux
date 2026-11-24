@@ -103,6 +103,9 @@ fun GameMap.walkTo(dir: Dir, destId: String): GameMap {
     if (destId != here && facts.none { it.from == destId && it.dir == back }) {
         facts = facts + Passage(destId, back, here, assumed = true)
     }
+    // Having just walked from here to there, any passage from there to here is not one-way
+    // after all: there is a way back, even if by a different direction.
+    facts = facts.map { if (it.oneWay && it.from == destId && it.to == here) it.copy(oneWay = false) else it }
     return copy(passages = facts, current = destId).explored(here, dir)
 }
 
@@ -115,8 +118,9 @@ fun GameMap.walkToNew(dir: Dir, name: String): GameMap {
 /**
  * The player tried [dir] from the current room and could not go.
  *
- * If the app had only assumed that way led back somewhere, the assumption was wrong:
- * the passage that created it is marked one-way.
+ * If the app had only assumed that way led back somewhere, the assumption was wrong and is
+ * dropped. The passage that created it is marked one-way, unless another way back is already
+ * known (a passage that returns by a different direction is bent, not one-way).
  */
 fun GameMap.cannotGo(dir: Dir): GameMap {
     val here = current
@@ -124,8 +128,11 @@ fun GameMap.cannotGo(dir: Dir): GameMap {
     if (old != null && !old.assumed && old.to != null) return this      // the player has walked it before
     var facts = passages.filterNot { it.from == here && it.dir == dir }
     if (old != null && old.assumed && old.to != null) {
-        facts = facts.map { p ->
-            if (p.from == old.to && p.to == here && p.dir == dir.opposite) p.copy(oneWay = true) else p
+        val anotherWayBack = facts.any { it.from == here && it.to == old.to && !it.assumed }
+        if (!anotherWayBack) {
+            facts = facts.map { p ->
+                if (p.from == old.to && p.to == here && p.dir == dir.opposite) p.copy(oneWay = true) else p
+            }
         }
     }
     return copy(passages = facts + Passage(here, dir, null)).explored(here, dir)
