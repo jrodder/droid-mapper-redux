@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -24,14 +26,17 @@ class MainActivity : ComponentActivity() {
         val store = MapStore(filesDir)
         setContent {
             MapperTheme {
-                // The app opens on the map you were last in; otherwise on the list of maps.
-                var open by rememberSaveable { mutableStateOf(store.lastOpened()) }
-                val id = open
-                if (id == null) {
-                    MapListScreen(store, onOpen = { store.setLastOpened(it); open = it })
-                } else {
-                    val vm: MapViewModel = viewModel(key = id, factory = viewModelFactory { initializer { MapViewModel(store, id) } })
-                    MapScreen(vm, onMaps = { store.setLastOpened(null); open = null })
+                // The surface gives plain text its colour, light on dark in the dark theme.
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    // The app opens on the map you were last in; otherwise on the list of maps.
+                    var open by rememberSaveable { mutableStateOf(store.lastOpened()) }
+                    val id = open
+                    if (id == null) {
+                        MapListScreen(store, onOpen = { store.setLastOpened(it); open = it })
+                    } else {
+                        val vm: MapViewModel = viewModel(key = id, factory = viewModelFactory { initializer { MapViewModel(store, id) } })
+                        MapScreen(vm, onMaps = { store.setLastOpened(null); open = null })
+                    }
                 }
             }
         }

@@ -112,7 +112,7 @@ Kotlin and Jetpack Compose, minSdk 24.
 
 ```bash
 ./gradlew assembleDebug        # app/build/outputs/apk/debug/app-debug.apk
-./gradlew testDebugUnitTest    # 35 tests on the plain JVM
+./gradlew testDebugUnitTest    # 36 tests on the plain JVM
 ```
 
 ## Repository layout
@@ -137,8 +137,9 @@ Nothing about position is stored. The map is a list of facts in the order you le
 ("leaving the Kitchen west leads to the Living Room"), and the drawing is worked out from
 those facts every time:
 
-1. A compass move to a new room puts it next to where you came from, opening a row or column
-   if that cell is taken.
+1. A compass move to a new room puts it next to where you came from. If that cell is taken,
+   a row or column is opened, unless that would knock a passage off its line and lengthening
+   one passage makes the room without doing so.
 2. A compass move into a known room that contradicts the drawing slides the small branch
    hanging off one end, if that makes more passages line up.
 3. Stretched straight passages are shortened wherever nothing is lost.

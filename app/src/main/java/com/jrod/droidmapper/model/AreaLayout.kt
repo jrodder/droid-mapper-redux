@@ -9,6 +9,7 @@ data class Cell(val x: Int, val y: Int)
 data class Placed(val area: Int, val x: Int, val y: Int)
 
 private const val MAX_GAP = 3       // how far apart two areas may be set down when a passage joins them
+private const val NEWCOMER = "\u0000new"   // stands in for a room about to be placed
 private const val DOCK_CAP = 6      // a group hung off a room by stairs is released once it grows past this
 
 private val UP_CELLS = listOf(Cell(0, -1), Cell(1, -1), Cell(-1, -1), Cell(1, 0), Cell(-1, 0))
@@ -23,8 +24,9 @@ private val ANY_CELLS = listOf(
  * Rooms live in areas, each with its own grid. A passage between two areas is drawn as a
  * label at each end, the way printed maps link their separate sheets.
  *
- *  - A compass move to a new room puts it next to where you came from, opening a row or
- *    column in that area if the cell is taken.
+ *  - A compass move to a new room puts it next to where you came from. If the cell is taken,
+ *    a row or column is opened in that area, unless that would knock a passage off its line
+ *    and lengthening one passage makes the room without doing so.
  *  - Up/down/in/out is a weak hint: the new room is set beside the room it hangs off when
  *    a cell is free. It, and whatever grows from it, is released into its own area as soon
  *    as that would collide with something, block a straight line, grow too big, or a
@@ -136,6 +138,57 @@ class AreaLayout(start: String, private val dock: Boolean = true) {
                 pos[r] = Cell(c.x, c.y + d.dy)
             }
         }
+    }
+
+    /**
+     * Make the cell [d] of [frm] free by lengthening one straight passage a step: the room at
+     * its far end, and everything held to that room by other straight passages, moves along.
+     * Only a result that keeps every one of the [had] passages straight will do; of those,
+     * the one that moves the fewest rooms.
+     */
+    private fun stretched(from: Map<String, Cell>, frm: String, d: Dir, had: Int): LinkedHashMap<String, Cell>? {
+        val i = area.getValue(frm)
+        val mem = members(i).toHashSet()
+        val full = mem.mapTo(HashSet()) { from.getValue(it) }
+        val links = known.filter { (a, dd, b) -> a in mem && b in mem && clear(from, full, a, b, dd) }
+        val rigid = HashMap<String, MutableSet<String>>()
+        fun tie(a: String, b: String) {
+            rigid.getOrPut(a) { HashSet() }.add(b); rigid.getOrPut(b) { HashSet() }.add(a)
+        }
+        for ((a, _, b) in links) tie(a, b)
+        for ((a, b) in tethers) if (a in mem && b in mem) tie(a, b)
+        var best: LinkedHashMap<String, Cell>? = null
+        var bestSize = Int.MAX_VALUE
+        for ((a, dd, b) in links) {
+            val group = hashSetOf(b)                     // what must travel with b
+            val stack = ArrayDeque(listOf(b))
+            while (stack.isNotEmpty()) {
+                val r = stack.removeLast()
+                for (q in rigid[r].orEmpty()) {
+                    val theLink = (r == a && q == b) || (r == b && q == a)
+                    if (q !in group && !theLink) { group.add(q); stack.add(q) }
+                }
+            }
+            if (a in group) continue                     // a loop of passages holds it at this length
+            val size = minOf(group.size, mem.size - group.size)
+            if (size >= bestSize) continue
+            val trial = LinkedHashMap(from)
+            for (r in group) {
+                val c = from.getValue(r)
+                trial[r] = Cell(c.x + dd.dx, c.y + dd.dy)
+            }
+            val rest = mem.filter { it !in group }.mapTo(HashSet()) { from.getValue(it) }
+            if (group.any { trial.getValue(it) in rest }) continue
+            val at = trial.getValue(frm)
+            val want = Cell(at.x + d.dx, at.y + d.dy)
+            if (mem.any { trial.getValue(it) == want }) continue
+            // judged with the new room standing in its cell, since it must not sit on a line either
+            val withNew = LinkedHashMap(trial).apply { put(NEWCOMER, want) }
+            val areaWithNew = LinkedHashMap(area).apply { put(NEWCOMER, i) }
+            if (score(withNew, areaWithNew) < had) continue
+            best = trial; bestSize = size
+        }
+        return best
     }
 
     private fun tryMerge(frm: String, d: Dir, to: String) {
@@ -279,7 +332,12 @@ class AreaLayout(start: String, private val dock: Boolean = true) {
             if (want in taken(area.getValue(frm))) {
                 dockRoot(frm)?.let(::eject)             // no room to grow here: go and be your own area
                 if (want in taken(area.getValue(frm))) {
+                    val untouched = LinkedHashMap(pos)
+                    val had = score(pos, area)
                     openSpace(area.getValue(frm), want, d)
+                    // Opening a whole row or column can knock a passage off its line. If it did,
+                    // see whether lengthening one passage makes the room without that loss.
+                    if (score(pos, area) < had) stretched(untouched, frm, d, had)?.let { pos = it }
                     want = wanted()
                 }
             }
