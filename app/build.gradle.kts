@@ -10,7 +10,7 @@ android {
     compileSdk = 36
     defaultConfig {
         applicationId = "com.jrod.droidmapper"
-        minSdk = 24; targetSdk = 36; versionCode = 5; versionName = "0.4.1"
+        minSdk = 24; targetSdk = 36; versionCode = 6; versionName = "0.4.2"
     }
     buildTypes { release { isMinifyEnabled = false } }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }

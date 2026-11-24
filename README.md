@@ -41,7 +41,8 @@ the old one and keep your maps.
   passage one-way on the room's card, or report "Couldn't go" when you try to return.
 - **Items** you note for a room are written beside it.
 - **The room you are in** has an orange outline, and the map glides to keep it centred.
-  Drag to pan and pinch to zoom.
+  Drag to pan and pinch to zoom. Double-tap empty space to see the whole map, and again to
+  come back to where you are.
 
 ### Rooms
 
@@ -90,10 +91,11 @@ reopens on the map you were last in.
 
 ## Known limits
 
-- A stair line can pass behind a room on the plate below, which can look as though the stairs
-  lead to that room.
-- Labels move aside so they never cover a room or each other, with a thin leader back to
-  their stub. In a crowded spot that gets busy.
+- A stairway whose line would have to pass over another room is shown as "up to" and
+  "down to" labels at each end. In a large game a fair number of stairways end up that way.
+- A stair line can still cross another line or an unrelated plate, though never a room.
+- Labels move aside so they never cover a room, a line or each other, with a thin leader back
+  to their stub. In a crowded spot that gets busy.
 - Folding a tangle redraws the map in one step, so rooms jump once when it happens.
 - A tangle that leaves by the same direction to several places only lets the first steer the
   layout; the others are shown as labels.
@@ -110,7 +112,7 @@ Kotlin and Jetpack Compose, minSdk 24.
 
 ```bash
 ./gradlew assembleDebug        # app/build/outputs/apk/debug/app-debug.apk
-./gradlew testDebugUnitTest    # 32 tests on the plain JVM
+./gradlew testDebugUnitTest    # 35 tests on the plain JVM
 ```
 
 ## Repository layout
@@ -123,8 +125,8 @@ Kotlin and Jetpack Compose, minSdk 24.
   - `data/` stores each map as one JSON file.
   - `ui/` is the Compose screens: the map and pad, the room card, the tangle view and the
     map list.
-- `app/src/test/` holds the unit tests, including one that replays a 302-move Zork I walk
-  and checks the Kotlin layout lands every room where the Python prototype did.
+- `app/src/test/` holds the unit tests, including full playthroughs of Zork I (302 moves)
+  and The Lurking Horror (190 moves) that redraw the map after every move.
 - `research/` is the Python prototypes the design was worked out in: game maps extracted
   from the published Infocom sources (Zork I and II, Enchanter, Planetfall, The Lurking
   Horror), layout experiments, and a stage-by-stage legibility test.

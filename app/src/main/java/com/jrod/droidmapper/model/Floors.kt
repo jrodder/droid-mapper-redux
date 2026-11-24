@@ -148,3 +148,61 @@ fun floorsOf(map: GameMap): Map<String, Spot> {
         Spot(p.area, level.getValue(p.area), p.x + o.x, p.y + o.y)
     }
 }
+
+/**
+ * How many rows each plate is drawn further up the page than its cells say, so that a level
+ * takes no more room than it needs.
+ *
+ * Plates on one level are set down beside the rooms their stairs lead from, which can leave
+ * them many rows apart with nothing between. Sliding a plate straight up or down the page
+ * keeps every stairway exactly as upright as it was. Plates joined by a level passage move
+ * together; the biggest group on a level stays put and the others close up to it, never
+ * nearer than a clear row from another plate.
+ *
+ * [lean] is how far one step south also shifts west on the page, and [pad] how far a plate
+ * reaches beyond its outermost rooms, both in cells.
+ */
+fun plateRises(map: GameMap, spot: Map<String, Spot>, lean: Float, pad: Float): Map<Int, Int> {
+    val plates = spot.values.groupBy { it.plate }
+    val head = HashMap<Int, Int>().apply { for (p in plates.keys) put(p, p) }
+    fun top(p: Int): Int { var x = p; while (head.getValue(x) != x) x = head.getValue(x); return x }
+    for (p in map.passages) {
+        val a = spot[p.from] ?: continue
+        val b = spot[p.to ?: continue] ?: continue
+        if (a.plate == b.plate || a.level != b.level || p.dir == Dir.UP || p.dir == Dir.DOWN) continue
+        val x = top(a.plate); val y = top(b.plate)
+        if (x != y) head[max(x, y)] = min(x, y)
+    }
+    class Box(val y0: Int, val y1: Int, val left: Float, val right: Float)
+    fun boxOf(p: Int): Box {
+        val ss = plates.getValue(p)
+        val y0 = ss.minOf { it.y }; val y1 = ss.maxOf { it.y }
+        return Box(y0, y1, ss.minOf { it.x } - pad - (y1 + pad) * lean, ss.maxOf { it.x } + pad - (y0 - pad) * lean)
+    }
+    val rise = HashMap<Int, Int>()
+    for (onLevel in plates.keys.groupBy { plates.getValue(it).first().level }.values) {
+        val groups = onLevel.groupBy(::top).values
+            .sortedWith(compareByDescending<List<Int>> { g -> g.sumOf { plates.getValue(it).size } }.thenBy { it.min() })
+        val done = ArrayList<Pair<Box, Int>>()
+        var lo = 0; var hi = 0
+        for ((i, group) in groups.withIndex()) {
+            val boxes = group.map(::boxOf)
+            val g0 = boxes.minOf { it.y0 }; val g1 = boxes.maxOf { it.y1 }
+            var best = 0
+            if (i > 0) {
+                fun free(k: Int) = boxes.none { b ->
+                    done.any { (o, ok) ->
+                        b.y0 - k <= o.y1 - ok + 1 && o.y0 - ok <= b.y1 - k + 1 && b.left < o.right + 0.3f && o.left < b.right + 0.3f
+                    }
+                }
+                fun extent(k: Int) = max(hi, g1 - k) - min(lo, g0 - k)
+                best = (min(g0 - hi, 0)..max(g1 - lo, 0)).filter(::free)
+                    .minWithOrNull(compareBy<Int> { extent(it) }.thenBy { kotlin.math.abs(it) }) ?: 0
+                lo = min(lo, g0 - best); hi = max(hi, g1 - best)
+            } else { lo = g0; hi = g1 }
+            for (p in group) rise[p] = best
+            boxes.forEach { done.add(it to best) }
+        }
+    }
+    return rise
+}

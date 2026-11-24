@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import com.jrod.droidmapper.model.DrawnLink
 import com.jrod.droidmapper.model.LinkKind
 import com.jrod.droidmapper.model.drawingOf
+import com.jrod.droidmapper.model.plateRises
 import com.jrod.droidmapper.model.Dir
 import com.jrod.droidmapper.model.GameMap
 import com.jrod.droidmapper.model.Passage
@@ -76,6 +77,8 @@ private class Scene(
     val plates: List<List<Offset>>,
     val levelNames: List<Pair<String, Offset>>,
     val links: List<DrawnLink>,
+    /** Where each drawn stairway runs: its upper end, then its lower end. */
+    val stairs: Map<DrawnLink, Pair<Offset, Offset>>,
     val loops: List<Passage>,
     val blocked: List<Passage>,
 )
@@ -88,23 +91,27 @@ private fun buildScene(map: GameMap, spot: Map<String, Spot>): Scene {
     val top = HashMap<Int, Float>()
     val back = HashMap<Int, Int>()
     var y = 0f
+    // Plates on a level are closed up the page so the level is no deeper than it has to be.
+    val rise = plateRises(map, spot, SLANT / CELL_W, PLATE_PAD)
+    fun row(s: Spot) = s.y - (rise[s.plate] ?: 0)
     for (lv in levels) {
-        val ys = spot.values.filter { it.level == lv }.map { it.y }
+        val ys = spot.values.filter { it.level == lv }.map(::row)
         back[lv] = ys.min()
         top[lv] = y
         y += (ys.max() - ys.min()) * CELL_D + TILE_D + LEVEL_GAP
     }
-    fun project(x: Float, yCell: Float, lv: Int) =
-        Offset(x * CELL_W - yCell * SLANT, top.getValue(lv) + (yCell - back.getValue(lv)) * CELL_D)
+    fun project(x: Float, yCell: Float, lv: Int, up: Int) =
+        Offset(x * CELL_W - yCell * SLANT, top.getValue(lv) + (yCell - up - back.getValue(lv)) * CELL_D)
 
-    val centre = spot.mapValues { (_, s) -> project(s.x.toFloat(), s.y.toFloat(), s.level) }
+    val centre = spot.mapValues { (_, s) -> project(s.x.toFloat(), s.y.toFloat(), s.level, rise[s.plate] ?: 0) }
     val plates = spot.values.groupBy { it.plate }.values.map { ss ->
         val lv = ss.first().level
+        val up = rise[ss.first().plate] ?: 0
         val x0 = ss.minOf { it.x } - PLATE_PAD
         val x1 = ss.maxOf { it.x } + PLATE_PAD
         val y0 = ss.minOf { it.y } - PLATE_PAD
         val y1 = ss.maxOf { it.y } + PLATE_PAD
-        listOf(project(x0, y0, lv), project(x1, y0, lv), project(x1, y1, lv), project(x0, y1, lv))
+        listOf(project(x0, y0, lv, up), project(x1, y0, lv, up), project(x1, y1, lv, up), project(x0, y1, lv, up))
     }
     val left = centre.values.minOf { it.x } - TILE_W
     val levelNames = if (levels.size < 2) emptyList() else levels.map { lv ->
@@ -119,7 +126,35 @@ private fun buildScene(map: GameMap, spot: Map<String, Spot>): Scene {
 
     // Which passages are lines, stairs or labelled stubs is decided in the model (and tested there).
     val drawing = drawingOf(map, spot, lean = SLANT / CELL_W)
-    return Scene(spot, centre, plates, levelNames, drawing.links, drawing.loops, drawing.blocked)
+
+    // A stairway is only drawn as a line if the line can get from one room to the other without
+    // passing over a third. It may leave either room anywhere along the facing edge to manage
+    // that. If it still cannot, the stairway becomes a pair of labels, like any other passage
+    // a line would misrepresent.
+    val tiles = centre.mapValues { (_, c) ->
+        Rect(c.x - TILE_W / 2 - LEAN - 5, c.y - TILE_D / 2 - 4, c.x + TILE_W / 2 + LEAN + 5, c.y + TILE_D / 2 + 4)
+    }
+    fun crosses(a: Offset, b: Offset, ends: DrawnLink) = tiles.any { (id, r) ->
+        if (id == ends.a || id == ends.b) return@any false
+        val y0 = maxOf(a.y, r.top); val y1 = minOf(b.y, r.bottom)
+        if (y0 > y1) return@any false
+        fun xAt(y: Float) = a.x + (b.x - a.x) * (y - a.y) / (b.y - a.y)
+        maxOf(xAt(y0), xAt(y1)) >= r.left && minOf(xAt(y0), xAt(y1)) <= r.right
+    }
+    val shifts = listOf(0f, -16f, 16f, -32f, 32f, -44f, 44f)
+    val pairs = shifts.flatMap { s -> shifts.map { t -> s to t } }.sortedBy { abs(it.first) + abs(it.second) }
+    val stairs = HashMap<DrawnLink, Pair<Offset, Offset>>()
+    val links = drawing.links.map { l ->
+        if (l.kind != LinkKind.STAIR) return@map l
+        val ca = centre.getValue(l.a); val cb = centre.getValue(l.b)
+        val hi = if (ca.y < cb.y) ca else cb
+        val lo = if (ca.y < cb.y) cb else ca
+        val run = pairs.asSequence()
+            .map { (s, t) -> Offset(hi.x - LEAN + s, hi.y + TILE_D / 2) to Offset(lo.x + LEAN + t, lo.y - TILE_D / 2) }
+            .firstOrNull { (from, to) -> to.y > from.y && !crosses(from, to, l) }
+        if (run == null) DrawnLink(l.a, l.b, l.ab, l.ba, LinkKind.STUB) else l.also { stairs[it] = run }
+    }
+    return Scene(spot, centre, plates, levelNames, links, stairs, drawing.loops, drawing.blocked)
 }
 
 @Composable
@@ -131,6 +166,8 @@ fun MapCanvas(
     val density = LocalDensity.current.density
     val measurer = rememberTextMeasurer()
     val scene = remember(map.passages, placed) { buildScene(map, placed) }
+    // Working out where every label goes is the slow part, so it is done once per change, not once per frame.
+    val labels = remember(scene, names, map.rooms, density, scheme) { LabelCache() }
     var size by remember { mutableStateOf(IntSize.Zero) }
     var zoom by remember { mutableFloatStateOf(1f) }
     val pan = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
@@ -143,10 +180,10 @@ fun MapCanvas(
     LaunchedEffect(map.current, here, size, whole) {
         if (here == null || size == IntSize.Zero) return@LaunchedEffect
         if (whole) {
-            val xs = scene.centre.values.map { it.x }
-            val ys = scene.centre.values.map { it.y }
-            val w = xs.max() - xs.min() + TILE_W * 1.6f
-            val h = ys.max() - ys.min() + TILE_D * 2.4f
+            val xs = scene.plates.flatten().map { it.x }
+            val ys = scene.plates.flatten().map { it.y }
+            val w = xs.max() - xs.min() + 60f
+            val h = ys.max() - ys.min() + 60f
             zoom = minOf(size.width / (w * density), size.height / (h * density)).coerceIn(0.06f, 1f)
             val middle = Offset((xs.max() + xs.min()) / 2, (ys.max() + ys.min()) / 2)
             pan.animateTo(Offset(size.width / 2f, size.height / 2f) - middle * (density * zoom))
@@ -185,7 +222,7 @@ fun MapCanvas(
             scale(density * zoom, density * zoom, Offset.Zero)
         }) {
             drawScene(
-                scene, map, names, boxes, measurer, density, todo = scheme.tertiary, fold = scheme.primaryContainer,
+                scene, labels, map, names, boxes, measurer, density, todo = scheme.tertiary, fold = scheme.primaryContainer,
                 ink = scheme.onSurface, box = scheme.surface, edge = scheme.outline, plate = scheme.outlineVariant,
                 accent = scheme.primary, warn = scheme.error, muted = scheme.onSurfaceVariant,
             )
@@ -223,8 +260,14 @@ private fun port(centre: Offset, d: Dir?, toward: Offset): Pair<Offset, Offset> 
     return Offset(centre.x + dx * TILE_W / 2 - dy * LEAN, centre.y + dy * TILE_D / 2) to onPage(dx, dy)
 }
 
+/** Where each label ended up, in the order the drawing asks for them. */
+private class LabelCache {
+    val placed = ArrayList<Pair<TextLayoutResult, Rect>>()
+    var filled = false
+}
+
 private fun DrawScope.drawScene(
-    scene: Scene, map: GameMap, names: Map<String, String>, boxes: Set<String>, measurer: TextMeasurer, density: Float,
+    scene: Scene, cache: LabelCache, map: GameMap, names: Map<String, String>, boxes: Set<String>, measurer: TextMeasurer, density: Float,
     todo: Color, fold: Color,
     ink: Color, box: Color, edge: Color, plate: Color, accent: Color, warn: Color, muted: Color,
 ) {
@@ -246,29 +289,76 @@ private fun DrawScope.drawScene(
         drawPath(path(corners), edge, style = Stroke(1.2f))
     }
 
-    // Nothing is ever written over a room or over another label.
-    val solid = scene.centre.values.mapTo(ArrayList()) {
-        Rect(it.x - TILE_W / 2 - LEAN - 3, it.y - TILE_D / 2 - 3, it.x + TILE_W / 2 + LEAN + 3, it.y + TILE_D / 2 + 3)
+    // Nothing is ever written over a room, a line or another label. Everything a label must
+    // keep clear of is gathered before the first label is placed.
+    val solid = ArrayList<Rect>()
+    fun along(from: Offset, to: Offset, half: Float) {          // a run of small boxes down a line
+        val steps = ((to - from).getDistance() / 9f).toInt().coerceAtLeast(1)
+        for (i in 0..steps) {
+            val p = from + (to - from) * (i / steps.toFloat())
+            solid.add(Rect(p.x - half, p.y - half, p.x + half, p.y + half))
+        }
     }
-    val pending = ArrayList<Pair<TextLayoutResult, Offset>>()
-    fun label(text: String, from: Offset, u: Offset, style: TextStyle) {
-        val laid = measurer.measure(text, style, maxLines = 1)
-        val w = laid.size.width.toFloat()
-        val h = laid.size.height.toFloat()
-        var best: Rect? = null
-        search@ for (along in listOf(4f, 10f, 18f, 28f, 42f, 60f)) {
-            for (side in listOf(0f, 12f, -12f, 22f, -22f, 34f, -34f, 46f, -46f)) {
-                val x = from.x + u.x * along - u.y * side
-                val y = from.y + u.y * along + u.x * side
-                val l = when { u.x > 0.3f -> x; u.x < -0.3f -> x - w; else -> x - w / 2 }
-                val t = when { u.y > 0.3f -> y; u.y < -0.3f -> y - h; else -> y - h / 2 }
-                val r = Rect(l, t, l + w, t + h)
-                if (best == null) best = r
-                if (solid.none { it.overlaps(r) }) { best = r; break@search }
+    val tiles = ArrayList<Rect>()
+    if (!cache.filled) {
+        scene.centre.values.mapTo(tiles) {
+            Rect(it.x - TILE_W / 2 - LEAN - 3, it.y - TILE_D / 2 - 3, it.x + TILE_W / 2 + LEAN + 3, it.y + TILE_D / 2 + 3)
+        }
+        solid.addAll(tiles)
+        for ((from, to) in scene.stairs.values) along(from, to, 5f)
+        for (l in scene.links) if (l.kind == LinkKind.STRAIGHT) {
+            val ca = scene.centre.getValue(l.a); val cb = scene.centre.getValue(l.b)
+            along(port(ca, l.ab?.dir ?: l.ba?.dir?.opposite, cb).first, port(cb, l.ba?.dir ?: l.ab?.dir?.opposite, ca).first, 3.5f)
+        }
+        for (p in scene.blocked + scene.loops) {
+            val c = scene.centre[p.from] ?: continue
+            val (at, u) = port(c, p.dir, c + Offset(0.7f, -1f))
+            solid.add(Rect(at.x + u.x * 8f - 9f, at.y + u.y * 8f - 9f, at.x + u.x * 8f + 9f, at.y + u.y * 8f + 9f))
+        }
+        for (room in map.rooms) {
+            val c = scene.centre[room.id] ?: continue
+            for (d in room.unexplored) if (d.isCompass && map.exit(room.id, d) == null) {
+                val (at, u) = port(c, d, c)
+                solid.add(Rect(at.x + u.x * 10f - 9f, at.y + u.y * 10f - 9f, at.x + u.x * 10f + 9f, at.y + u.y * 10f + 9f))
             }
         }
-        solid.add(best!!)
-        pending.add(laid to best.topLeft)
+    }
+    val pending = ArrayList<Pair<TextLayoutResult, Offset>>()
+    var asked = 0
+    fun label(text: String, from: Offset, u: Offset, style: TextStyle) {
+        val known = if (cache.filled) cache.placed.getOrNull(asked) else null
+        asked++
+        val laid = known?.first ?: measurer.measure(text, style, maxLines = 1)
+        var best: Rect? = known?.second
+        if (best == null) {
+            val w = laid.size.width.toFloat()
+            val h = laid.size.height.toFloat()
+            var least = Float.MAX_VALUE
+            search@ for (out in listOf(4f, 10f, 18f, 28f, 42f, 60f, 80f, 105f, 135f)) {
+                for (side in listOf(0f, 12f, -12f, 22f, -22f, 34f, -34f, 46f, -46f, 60f, -60f, 76f, -76f, 94f, -94f, 115f, -115f)) {
+                    val x = from.x + u.x * out - u.y * side
+                    val y = from.y + u.y * out + u.x * side
+                    val l = when { u.x > 0.3f -> x; u.x < -0.3f -> x - w; else -> x - w / 2 }
+                    val t = when { u.y > 0.3f -> y; u.y < -0.3f -> y - h; else -> y - h / 2 }
+                    val r = Rect(l - 2f, t, l + w + 2f, t + h)
+                    // if nowhere is free, the spot covering least is the one to settle for
+                    var covered = 0f
+                    for (o in solid) if (o.overlaps(r)) covered += o.intersect(r).let { it.width * it.height }
+                    // a leader that would have to run behind a room is as bad as covering something
+                    val near = Offset(from.x.coerceIn(r.left, r.right), from.y.coerceIn(r.top, r.bottom))
+                    val reach = (near - from).getDistance()
+                    if (reach > 9f) for (i in 1..(reach / 5f).toInt()) {
+                        val p = from + (near - from) * (i * 5f / reach)
+                        if (tiles.any { it.contains(p) }) { covered += 4000f; break }
+                    }
+                    if (covered < least) { least = covered; best = r }
+                    if (covered == 0f) break@search
+                }
+            }
+            solid.add(best!!)
+            if (!cache.filled) cache.placed.add(laid to best)
+        }
+        pending.add(laid to Offset(best.left + 2f, best.top))
         // A label that had to move aside keeps a thin leader back to what it describes.
         val near = Offset(from.x.coerceIn(best.left, best.right), from.y.coerceIn(best.top, best.bottom))
         if ((near - from).getDistance() > 9f) drawLine(muted, from, near, 1f)
@@ -289,21 +379,6 @@ private fun DrawScope.drawScene(
         label("$word ${names[other]}", end, u, style)
     }
 
-    // Stairways are known before any label is placed, so no label is ever set down on one.
-    for (l in scene.links) if (l.kind == LinkKind.STAIR) {
-        val ca = scene.centre.getValue(l.a)
-        val cb = scene.centre.getValue(l.b)
-        val hi = if (ca.y < cb.y) ca else cb
-        val lo = if (ca.y < cb.y) cb else ca
-        // a run of small boxes down the line, since the line may lean
-        val steps = ((lo.y - hi.y) / 14f).toInt().coerceAtLeast(1)
-        for (i in 0..steps) {
-            val t = i / steps.toFloat()
-            val x = hi.x - LEAN + (lo.x + LEAN - (hi.x - LEAN)) * t
-            val y = hi.y + TILE_D / 2 + (lo.y - TILE_D / 2 - (hi.y + TILE_D / 2)) * t
-            solid.add(Rect(x - 5f, y - 8f, x + 5f, y + 8f))
-        }
-    }
     for (l in scene.links) {
         val ca = scene.centre.getValue(l.a)
         val cb = scene.centre.getValue(l.b)
@@ -320,10 +395,7 @@ private fun DrawScope.drawScene(
             LinkKind.STAIR -> {
                 // from the bottom edge of the upper room to the top edge of the lower one
                 val aIsUpper = la > lb
-                val hi = if (aIsUpper) ca else cb
-                val lo = if (aIsUpper) cb else ca
-                val from = Offset(hi.x - LEAN, hi.y + TILE_D / 2)
-                val to = Offset(lo.x + LEAN, lo.y - TILE_D / 2)
+                val (from, to) = scene.stairs.getValue(l)
                 drawLine(accent, from, to, 2.6f)
                 drawCircle(accent, 3.6f, from)
                 drawCircle(accent, 3.6f, to)
@@ -371,7 +443,6 @@ private fun DrawScope.drawScene(
                 val (at, u) = port(c, d, c)
                 drawLine(todo, at, at + u * 10f, 2.4f)
                 drawCircle(todo, 4.2f, at + u * 14.5f, style = Stroke(2.2f))
-                solid.add(Rect(at.x + u.x * 14.5f - 7f, at.y + u.y * 14.5f - 7f, at.x + u.x * 14.5f + 7f, at.y + u.y * 14.5f + 7f))
             } else {
                 val up = d == Dir.UP || d == Dir.IN
                 label("${d.label}?", Offset(c.x + TILE_W / 2 - 16f, c.y + if (up) -TILE_D / 2 - 2f else TILE_D / 2 + 2f),
@@ -387,6 +458,7 @@ private fun DrawScope.drawScene(
             .let { if (it.length > 34) it.take(33) + "…" else it }
         label(text, Offset(c.x - TILE_W / 2 + 6f, c.y + TILE_D / 2 + 2f), Offset(1f, 1f) / hypot(1f, 1f), itemStyle)
     }
+    cache.filled = true
     for ((laid, at) in pending) {
         drawRoundRect(plate, at - Offset(3f, 0f), Size(laid.size.width + 6f, laid.size.height.toFloat()), CornerRadius(3f))
         drawText(laid, topLeft = at)
